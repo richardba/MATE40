@@ -1,0 +1,25 @@
+# depslib dependency file v1.0
+1486755748 source:c:\users\ricardo.labcg-pc\bezier\main.cpp
+	<GL/glut.h>
+	<fstream>
+	<glm/glm.hpp>
+	<iostream>
+	<math.h>
+	<stdio.h>
+	<stdlib.h>
+	<vector>
+	"include/utils.h"
+	"include/Mesh.h"
+
+1486664596 c:\users\ricardo.labcg-pc\bezier\include\utils.h
+	<vector>
+	<GL/glut.h>
+
+1486660262 c:\users\ricardo.labcg-pc\bezier\include\mesh.h
+	<vector>
+
+1486755562 source:c:\users\ricardo.labcg-pc\bezier\mesh.cpp
+	"include/Mesh.h"
+	"include/utils.h"
+	<iostream>
+
