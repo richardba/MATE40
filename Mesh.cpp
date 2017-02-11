@@ -69,50 +69,84 @@ void Mesh::calcEdge()
 
 void Mesh::drawFaces()
 {
-  vector<int> face;
   int i;
-  for (i = 0; i < points.size() - SLICES - 1; i++)
+  if(unordered_points)
   {
-    if ((i + 1) % (SLICES + 1) != 0)
+    for (i = 0; i < points.size() - SLICES - 1; i++)
     {
-      //std:cout << i/(points.size()-SLICES-2.0f) << endl;
-      glColor3d(.0, .0, i/(points.size()-SLICES-2.0f));
-      glPointSize(3);
-      glBegin(GL_POINTS);
-      glVertex3d(points[i+1][0], points[i+1][1], points[i+1][2]);
-      glEnd();
-      glColor3d(0.0, .5, .25);
-      glBegin(GL_TRIANGLES);
-      glVertex3d(points[i][0], points[i][1], points[i][2]);
-      glVertex3d(points[i + 1][0], points[i + 1][1], points[i + 1][2]);
-      glVertex3d(points[i+ SLICES+1][0], points[i+SLICES+1][1], points[i+SLICES+1][2]);
-      glEnd();
-      glColor3d(.5, .25, 0.0);
-      glBegin(GL_TRIANGLES);
-      glVertex3d(points[i+1][0], points[i+1][1], points[i+1][2]);
-      glVertex3d(points[i + SLICES+1][0], points[i + SLICES+1][1], points[i + SLICES+1][2]);
-      glVertex3d(points[i+ SLICES+2][0], points[i+SLICES+2][1], points[i+SLICES+2][2]);
-      glEnd();
-    }
-  }
+      if ((i + 1) % (SLICES + 1) != 0)
+      {
+        //UPPER TRIANGLE
+        const vec3 UL0 = vec3(points[i][0], points[i][1], points[i][2]);
+        const vec3 UR0 = vec3(points[i + 1][0], points[i + 1][1], points[i + 1][2]);
+        const vec3 LL0 = vec3(points[i+ SLICES+1][0], points[i+SLICES+1][1], points[i+SLICES+1][2]);
 
-  for (; i < points.size() - 1; i++)
-  {
-    glColor3d(0.0, .5, .25);
-    glBegin(GL_LINES);
-    glVertex3d(points[i][0], points[i][1], points[i][2]);
-    glVertex3d(points[i + SLICES + 1 - points.size()][0], points[i + SLICES + 1 - points.size()][1], points[i + SLICES + 1 - points.size()][2]);
-    glVertex3d(points[i + 1][0], points[i + 1][1], points[i + 1][2]);
-    glVertex3d(points[i + SLICES + 2 - points.size()][0], points[i + SLICES + 2 - points.size()][1], points[i + SLICES + 2 - points.size()][2]);
-    glEnd();
-    glColor3d(.5, .25, 0.0);
-    glBegin(GL_LINES);
-    glVertex3d(points[i][0], points[i][1], points[i][2]);
-    glVertex3d(points[i + 1][0], points[i + 1][1], points[i + 1][2]);
-    glVertex3d(points[i + SLICES + 1 - points.size()][0], points[i + SLICES + 1 - points.size()][1], points[i + SLICES + 1 - points.size()][2]);
-    glVertex3d(points[i + SLICES + 2 - points.size()][0], points[i + SLICES + 2 - points.size()][1], points[i + SLICES + 2 - points.size()][2]);
-    glEnd();
+        //LOWER TRIANGLE
+        const vec3 UR1 = vec3(points[i+1][0], points[i+1][1], points[i+1][2]);
+        const vec3 LL1 = vec3(points[i + SLICES+1][0], points[i + SLICES+1][1], points[i + SLICES+1][2]);
+        const vec3 LR1 = vec3(points[i+ SLICES+2][0], points[i+SLICES+2][1], points[i+SLICES+2][2]);
+
+        vec3 normal0, normal1;
+        if(i>=(points.size()/2))
+        {
+          normal0 = normalize( cross( UL0 - LL0, UR0 - LL0) );
+          normal1 = normalize( cross( UR1 - LL1, LR1 - LL1) );
+        } else
+        {
+          normal0 = normalize( cross( UR0 - LL0, UL0 - LL0 ) );
+          normal1 = normalize( cross( LR1 - LL1, UR1 - LL1 ) );
+        }
+
+        vertex.push_back( Vertex( LL0, normal0 ) );
+        vertex.push_back( Vertex( UR0, normal0 ) );
+        vertex.push_back( Vertex( UL0, normal0 ) );
+        vertex.push_back( Vertex( LL1, normal1 ) );
+        vertex.push_back( Vertex( LR1, normal1 ) );
+        vertex.push_back( Vertex( UR1, normal1 ) );
+      }
+    }
+
+    for (; i < points.size() - 1; i++)
+    {
+      const vec3 UL0 = vec3(points[i][0], points[i][1], points[i][2]);
+      const vec3 UR0 = vec3(points[i + 1][0], points[i + 1][1], points[i + 1][2]);
+      const vec3 LL0 = vec3(points[i+ SLICES+1 - points.size()][0], points[i+SLICES+1 - points.size()][1], points[i+SLICES+1 - points.size()][2]);
+
+
+      const vec3 UR1 = vec3(points[i+1][0], points[i+1][1], points[i+1][2]);
+      const vec3 LL1 = vec3(points[i + SLICES+1 - points.size()][0], points[i + SLICES+1 - points.size()][1], points[i + SLICES+1 - points.size()][2]);
+      const vec3 LR1 = vec3(points[i+ SLICES+2 - points.size()][0], points[i+SLICES+2 - points.size()][1], points[i+SLICES+2 - points.size()][2]);
+
+      vec3 normal0, normal1;
+      if(i>=(points.size()/2))
+      {
+        normal0 = normalize( cross( UL0 - LL0, UR0 - LL0) );
+        normal1 = normalize( cross( UR1 - LL1, LR1 - LL1) );
+      } else
+      {
+        normal0 = normalize( cross( UR0 - LL0, UL0 - LL0 ) );
+        normal1 = normalize( cross( LR1 - LL1, UR1 - LL1 ) );
+      }
+
+      vertex.push_back( Vertex( LL0, normal0 ) );
+      vertex.push_back( Vertex( UR0, normal0 ) );
+      vertex.push_back( Vertex( UL0, normal0 ) );
+      vertex.push_back( Vertex( LL1, normal1 ) );
+      vertex.push_back( Vertex( LR1, normal1 ) );
+      vertex.push_back( Vertex( UR1, normal1 ) );
+
+    }
+    unordered_points=0;
   }
+  glColor3ub(0.0, 128, 64);
+  glEnableClientState( GL_VERTEX_ARRAY );
+  glEnableClientState( GL_NORMAL_ARRAY );
+  glVertexPointer( 3, GL_FLOAT, sizeof(Vertex), &vertex[0].position );
+  glNormalPointer( GL_FLOAT, sizeof(Vertex), &vertex[0].normal );
+  glDrawArrays( GL_TRIANGLES, 0, vertex.size() );
+  glDisableClientState( GL_VERTEX_ARRAY );
+  glDisableClientState( GL_NORMAL_ARRAY );
+
 }
 
 Mesh::~Mesh()

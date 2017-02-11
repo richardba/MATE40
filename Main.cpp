@@ -13,7 +13,8 @@ using namespace std;
 using namespace glm;
 
 bool complete = 0,
-     started=0;
+     started=0,
+     unordered_points=1;
 
 int picked = 0,
     btn,
@@ -31,13 +32,15 @@ double eyeX=0,
        theta=0,
        phi=0;
 
-vector<Point> controlPoints;
-Point sample[SLICES + 1];
+vector<vec3> controlPoints;
+vector<Vertex> vertex;
+
+vec3 sample[SLICES + 1];
 
 Mesh mesh;
 
 
-void drawLine(Point a, Point b)
+void drawLine(vec3 a, vec3 b)
 {
   glColor3f(0.0, 1.0, 1.0);
 
@@ -63,9 +66,9 @@ void drawCircle(double xc, double yc, double radius)
   glPopMatrix();
 }
 
-Point interpolation(Point a, Point b, double t)
+vec3 interpolation(vec3 a, vec3 b, double t)
 {
-  Point c;
+  vec3 c;
   c.x = (1 - t)*a.x + t*b.x;
   c.y = (1 - t)*a.y + t*b.y;
   c.z = (1 - t)*a.z + t*b.z;
@@ -80,13 +83,13 @@ void drawBezier()
   }
 }
 
-Point calcCasteljau(double t, vector<Point> points)
+vec3 calcCasteljau(double t, vector<vec3> points)
 {
   if(points.size()==1)
     return points[0];
   else
   {
-    vector<Point> tmp;
+    vector<vec3> tmp;
     for(int inc=0; inc<points.size()-1; inc++)
       tmp.push_back(interpolation(points[inc], points[inc+1], t));
     return calcCasteljau(t,tmp);
@@ -149,7 +152,6 @@ void glutDisplay()
   if(complete)
   {
     glClearColor(0.5, 1.0, 1.0, 0.0);
-    glEnable( GL_LIGHT0 );
 
     glMatrixMode( GL_MODELVIEW );
     glMatrixMode(GL_PROJECTION);
@@ -221,7 +223,6 @@ void mouse(int button, int state, int x, int y )
 
   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && !complete)
   {
-    cout << "ponto" << endl;
     for (int inc = 0; inc < ::count; inc++)
     {
       if ((pow((double)(controlPoints[inc].x - x), 2)) + (pow((double)(controlPoints[inc].y - HEIGHT + y), 2)) <= pow((double)10, 2))
@@ -233,7 +234,7 @@ void mouse(int button, int state, int x, int y )
 
     if (!picked)
     {
-      Point newp;
+      vec3 newp;
       newp.x = x;
       newp.y = HEIGHT-y, newp.z = 0;
       controlPoints.push_back(newp);
@@ -312,6 +313,17 @@ int main(int argc, char** argv)
   glutMotionFunc(activeMotion);
   glutKeyboardFunc(processNormalKeys);
   glutIgnoreKeyRepeat(1);
+
+    // set up lighting
+    glShadeModel( GL_SMOOTH );
+    glEnable( GL_COLOR_MATERIAL );
+    glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE ) ;
+    glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE );
+    glEnable( GL_LIGHTING );
+
+  glEnable( GL_LIGHT0 );
+  GLfloat position[] = { 0, 0, 1, 0 };
+  glLightfv( GL_LIGHT0, GL_POSITION, position );
 
   glutMainLoop();
   return 0;
