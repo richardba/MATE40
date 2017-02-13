@@ -87,10 +87,10 @@ void Mesh::drawFaces()
         const vec3 LR1 = vec3(points[i+ SLICES+2][0], points[i+SLICES+2][1], points[i+SLICES+2][2]);
 
         vec3 normal0, normal1;
-        if(i>=(points.size()/2))
+        if(i<=(points.size()/2))
         {
-          normal0 = normalize( cross( UL0 - LL0, UR0 - LL0) );
-          normal1 = normalize( cross( UR1 - LL1, LR1 - LL1) );
+          normal0 = normalize(cross(UL0 - UR0, LL0 - UR0));
+          normal1 = normalize( cross( LR1 - LL1, UR1 - LL1 ) );
         } else
         {
           normal0 = normalize( cross( UR0 - LL0, UL0 - LL0 ) );
@@ -118,7 +118,7 @@ void Mesh::drawFaces()
       const vec3 LR1 = vec3(points[i+ SLICES+2 - points.size()][0], points[i+SLICES+2 - points.size()][1], points[i+SLICES+2 - points.size()][2]);
 
       vec3 normal0, normal1;
-      if(i>=(points.size()/2))
+      if(i<=(points.size()/2))
       {
         normal0 = normalize( cross( UL0 - LL0, UR0 - LL0) );
         normal1 = normalize( cross( UR1 - LL1, LR1 - LL1) );
