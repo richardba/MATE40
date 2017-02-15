@@ -118,10 +118,10 @@ void glutDisplay()
 
 	glEnable (GL_LINE_SMOOTH);
 	glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-  glClearColor(0.0, 0.0, 0.0, 0.0);
 
   if (!complete)
   {
+    glClearColor(0.0, 0.0, 0.0, 0.0);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0.0, 900.0, 0.0, 600.0, -900.0, 900.0);
@@ -176,6 +176,7 @@ void glutDisplay()
         float yp = mv[1] * sample[j].x + mv[5] * sample[j].y + mv[9] * sample[j].z + mv[13];
         float zp = mv[2] * sample[j].x + mv[6] * sample[j].y + mv[10] * sample[j].z + mv[14];
         float wp = mv[3] * sample[j].x + mv[7] * sample[j].y + mv[11] * sample[j].z + mv[15];
+        wp *= wp;
 
         xp /= wp;
         yp /= wp;
@@ -196,7 +197,7 @@ void glutDisplay()
     mesh.calcEdge();
     mesh.drawFaces();
   }
-  glFlush();
+  glutSwapBuffers();
 }
 
 void processNormalKeys(unsigned char key, int xx, int yy)
@@ -298,10 +299,14 @@ void activeMotion(int x, int y)
 int main(int argc, char** argv)
 {
   glutInit(&argc, argv);
+
+  glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE );
+
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_FRONT);
-  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+  glFrontFace(GL_CCW);
+
   glutInitWindowSize(WIDTH, HEIGHT);
   glutInitWindowPosition(25, 25);
   glutCreateWindow("Surface of Revolution");

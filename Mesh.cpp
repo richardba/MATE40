@@ -1,8 +1,10 @@
 #include "include/Mesh.h"
 #include "include/utils.h"
 #include <iostream>
+#include <climits>
 
 using namespace std;
+double maxX=LLONG_MIN , maxY=LLONG_MIN, maxZ=LLONG_MIN, minX=LLONG_MAX, minY=LLONG_MAX, minZ=LLONG_MAX;
 void Mesh::clearPoints()
 {
   points.clear();
@@ -77,67 +79,102 @@ void Mesh::drawFaces()
       if ((i + 1) % (SLICES + 1) != 0)
       {
         //UPPER TRIANGLE
-        const vec3 UL0 = vec3(points[i][0], points[i][1], points[i][2]);
-        const vec3 UR0 = vec3(points[i + 1][0], points[i + 1][1], points[i + 1][2]);
-        const vec3 LL0 = vec3(points[i+ SLICES+1][0], points[i+SLICES+1][1], points[i+SLICES+1][2]);
 
-        //LOWER TRIANGLE
-        const vec3 UR1 = vec3(points[i+1][0], points[i+1][1], points[i+1][2]);
-        const vec3 LL1 = vec3(points[i + SLICES+1][0], points[i + SLICES+1][1], points[i + SLICES+1][2]);
-        const vec3 LR1 = vec3(points[i+ SLICES+2][0], points[i+SLICES+2][1], points[i+SLICES+2][2]);
 
-        vec3 normal0, normal1;
-        if(i<=(points.size()/2))
+        const vec3 UL = vec3(points[i][0], points[i][1], points[i][2]);
+        const vec3 UR = vec3(points[i + 1][0], points[i + 1][1], points[i + 1][2]);
+        const vec3 LL = vec3(points[i+ SLICES+1][0], points[i+SLICES+1][1], points[i+SLICES+1][2]);
+        const vec3 LR = vec3(points[i+ SLICES+2][0], points[i+SLICES+2][1], points[i+SLICES+2][2]);
+
+        const vec3 normal0 = normalize(cross(UR - LL, UL - LL));
+        const vec3 normal1 = normalize(cross(LR - LL, UL - LL));
+
+        vertex.push_back( Vertex( LL, normal0 ) );
+        vertex.push_back( Vertex( UR, normal0 ) );
+        vertex.push_back( Vertex( UL, normal0 ) );
+        vertex.push_back( Vertex( LL, normal1 ) );
+        vertex.push_back( Vertex( LR, normal1 ) );
+        vertex.push_back( Vertex( UR, normal1 ) );
+        if(UL.x>maxX)
         {
-          normal0 = normalize(cross(UL0 - UR0, LL0 - UR0));
-          normal1 = normalize( cross( LR1 - LL1, UR1 - LL1 ) );
-        } else
+          maxX=UL.x;
+        }
+        else if(UR.x>maxX)
         {
-          normal0 = normalize( cross( UR0 - LL0, UL0 - LL0 ) );
-          normal1 = normalize( cross( LR1 - LL1, UR1 - LL1 ) );
+          maxX=UR.x;
+        }
+        else if(LL.x>maxX)
+        {
+          maxX=LL.x;
+        }
+        else if(LR.x>maxX)
+        {
+          maxX=LR.x;
         }
 
-        vertex.push_back( Vertex( LL0, normal0 ) );
-        vertex.push_back( Vertex( UR0, normal0 ) );
-        vertex.push_back( Vertex( UL0, normal0 ) );
-        vertex.push_back( Vertex( LL1, normal1 ) );
-        vertex.push_back( Vertex( LR1, normal1 ) );
-        vertex.push_back( Vertex( UR1, normal1 ) );
+        if(UL.y>maxY)
+        {
+          maxY=UL.y;
+        }
+        else if(UR.y>maxY)
+        {
+          maxY=UR.y;
+        }
+        else if(LL.y>maxY)
+        {
+          maxY=LL.y;
+        }
+        else if(LR.y>maxY)
+        {
+          maxY=LR.y;
+        }
+
+        if(UL.z>maxZ)
+        {
+          maxZ=UL.z;
+        }
+        else if(UR.z>maxZ)
+        {
+          maxZ=UR.z;
+        }
+        else if(LL.z>maxZ)
+        {
+          maxZ=LL.z;
+        }
+        else if(LR.z>maxZ)
+        {
+          maxZ=LR.z;
+        }
       }
     }
 
     for (; i < points.size() - 1; i++)
     {
-      const vec3 UL0 = vec3(points[i][0], points[i][1], points[i][2]);
-      const vec3 UR0 = vec3(points[i + 1][0], points[i + 1][1], points[i + 1][2]);
-      const vec3 LL0 = vec3(points[i+ SLICES+1 - points.size()][0], points[i+SLICES+1 - points.size()][1], points[i+SLICES+1 - points.size()][2]);
+      const vec3 UL = vec3(points[i][0], points[i][1], points[i][2]);
+      const vec3 UR = vec3(points[i + 1][0], points[i + 1][1], points[i + 1][2]);
+      const vec3 LL = vec3(points[i+ SLICES+1 - points.size()][0], points[i+SLICES+1 - points.size()][1], points[i+SLICES+1 - points.size()][2]);
+      const vec3 LR = vec3(points[i+ SLICES+2 - points.size()][0], points[i+SLICES+2 - points.size()][1], points[i+SLICES+2 - points.size()][2]);
 
+      const vec3 normal0 = normalize(cross(UR - LL, UL - LL));
+      const vec3 normal1 = normalize(cross(LR - LL, UL - LL));
 
-      const vec3 UR1 = vec3(points[i+1][0], points[i+1][1], points[i+1][2]);
-      const vec3 LL1 = vec3(points[i + SLICES+1 - points.size()][0], points[i + SLICES+1 - points.size()][1], points[i + SLICES+1 - points.size()][2]);
-      const vec3 LR1 = vec3(points[i+ SLICES+2 - points.size()][0], points[i+SLICES+2 - points.size()][1], points[i+SLICES+2 - points.size()][2]);
-
-      vec3 normal0, normal1;
-      if(i<=(points.size()/2))
-      {
-        normal0 = normalize( cross( UL0 - LL0, UR0 - LL0) );
-        normal1 = normalize( cross( UR1 - LL1, LR1 - LL1) );
-      } else
-      {
-        normal0 = normalize( cross( UR0 - LL0, UL0 - LL0 ) );
-        normal1 = normalize( cross( LR1 - LL1, UR1 - LL1 ) );
-      }
-
-      vertex.push_back( Vertex( LL0, normal0 ) );
-      vertex.push_back( Vertex( UR0, normal0 ) );
-      vertex.push_back( Vertex( UL0, normal0 ) );
-      vertex.push_back( Vertex( LL1, normal1 ) );
-      vertex.push_back( Vertex( LR1, normal1 ) );
-      vertex.push_back( Vertex( UR1, normal1 ) );
+      vertex.push_back( Vertex( LL, normal0 ) );
+      vertex.push_back( Vertex( UR, normal0 ) );
+      vertex.push_back( Vertex( UL, normal0 ) );
+      vertex.push_back( Vertex( LL, normal1 ) );
+      vertex.push_back( Vertex( LR, normal1 ) );
+      vertex.push_back( Vertex( UR, normal1 ) );
 
     }
+    points.clear();
     unordered_points=0;
   }
+
+
+  glPolygonMode( GL_FRONT, GL_FILL );
+  glPolygonMode( GL_BACK, GL_FILL );
+
+
   glColor3ub(0.0, 128, 64);
   glEnableClientState( GL_VERTEX_ARRAY );
   glEnableClientState( GL_NORMAL_ARRAY );
@@ -146,7 +183,6 @@ void Mesh::drawFaces()
   glDrawArrays( GL_TRIANGLES, 0, vertex.size() );
   glDisableClientState( GL_VERTEX_ARRAY );
   glDisableClientState( GL_NORMAL_ARRAY );
-
 }
 
 Mesh::~Mesh()

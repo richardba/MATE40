@@ -23,3 +23,5 @@ struct Vertex
 };
 
 extern vector<Vertex> vertex;
+extern double maxX, maxY, maxZ;
+extern double minX, minY, minZ;
