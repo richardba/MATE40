@@ -1,10 +1,10 @@
 #include "include/Mesh.h"
-#include "include/utils.h"
+#include "include/Utils.h"
 #include <iostream>
 #include <climits>
 
 using namespace std;
-double maxX=LLONG_MIN , maxY=LLONG_MIN, maxZ=LLONG_MIN, minX=LLONG_MAX, minY=LLONG_MAX, minZ=LLONG_MAX;
+double maxCoords[]= {-THE_NUMBER , -THE_NUMBER, -THE_NUMBER}, minCoords[]= {THE_NUMBER, THE_NUMBER, THE_NUMBER};
 void Mesh::clearPoints()
 {
   points.clear();
@@ -95,56 +95,7 @@ void Mesh::drawFaces()
         vertex.push_back( Vertex( LL, normal1 ) );
         vertex.push_back( Vertex( LR, normal1 ) );
         vertex.push_back( Vertex( UR, normal1 ) );
-        if(UL.x>maxX)
-        {
-          maxX=UL.x;
-        }
-        else if(UR.x>maxX)
-        {
-          maxX=UR.x;
-        }
-        else if(LL.x>maxX)
-        {
-          maxX=LL.x;
-        }
-        else if(LR.x>maxX)
-        {
-          maxX=LR.x;
-        }
 
-        if(UL.y>maxY)
-        {
-          maxY=UL.y;
-        }
-        else if(UR.y>maxY)
-        {
-          maxY=UR.y;
-        }
-        else if(LL.y>maxY)
-        {
-          maxY=LL.y;
-        }
-        else if(LR.y>maxY)
-        {
-          maxY=LR.y;
-        }
-
-        if(UL.z>maxZ)
-        {
-          maxZ=UL.z;
-        }
-        else if(UR.z>maxZ)
-        {
-          maxZ=UR.z;
-        }
-        else if(LL.z>maxZ)
-        {
-          maxZ=LL.z;
-        }
-        else if(LR.z>maxZ)
-        {
-          maxZ=LR.z;
-        }
       }
     }
 
@@ -164,8 +115,19 @@ void Mesh::drawFaces()
       vertex.push_back( Vertex( LL, normal1 ) );
       vertex.push_back( Vertex( LR, normal1 ) );
       vertex.push_back( Vertex( UR, normal1 ) );
+      boundingLimits(maxCoords,UR);
+      boundingLimits(maxCoords,UL);
+      boundingLimits(maxCoords,LL);
+      boundingLimits(maxCoords,LR);
 
     }
+//
+//  cout << maxCoords[0] << "\n"
+//  << maxCoords[1] << "\n"
+//  << maxCoords[2] << "\n"
+//  << maxCoords[3] << "\n"
+//  << maxCoords[4] << "\n"
+//  << maxCoords[5] << endl;
     points.clear();
     unordered_points=0;
   }

@@ -1,3 +1,4 @@
+#include <GL/glew.h>
 #include <GL/glut.h>
 #include <fstream>
 #include <glm/glm.hpp>
@@ -6,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
-#include "include/utils.h"
+#include "include/Utils.h"
 #include "include/Mesh.h"
 
 using namespace std;
@@ -16,12 +17,15 @@ bool complete = 0,
      started=0,
      unordered_points=1;
 
-int picked = 0,
+int picked,
     btn,
     oldX=0,
     oldY=0,
     radius=200,
-    pickIndex;
+    pickIndex,
+    count = 0,
+    form = 0,
+    del = 0;
 
 double eyeX=0,
        eyeY=4,
@@ -107,10 +111,6 @@ void computeBezier()
   }
 }
 
-int count = 0;
-int form = 0;
-int del = 0;
-
 void glutDisplay()
 {
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -121,7 +121,8 @@ void glutDisplay()
 
   if (!complete)
   {
-    glClearColor(0.0, 0.0, 0.0, 0.0);
+
+    glClearColor(blackColor.x, blackColor.y, blackColor.z, blackColor.w);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0.0, 900.0, 0.0, 600.0, -900.0, 900.0);
@@ -151,7 +152,7 @@ void glutDisplay()
   }
   if(complete)
   {
-    glClearColor(0.5, 1.0, 1.0, 0.0);
+    glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
 
     glMatrixMode( GL_MODELVIEW );
     glMatrixMode(GL_PROJECTION);
@@ -161,40 +162,42 @@ void glutDisplay()
     glLoadIdentity();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     gluLookAt(eyeX, eyeY, eyeZ, pickObjX, pickObjY, pickObjZ, 0,1,0);
-
-    vector<double> temp;
-    mesh.clearPoints();
-    for (int i = 0; i < 360; i += 5)
+    if(unordered_points)
     {
-      glPushMatrix();
-      glRotated(i, 0.0, 1.0, 0.0);
-      float mv[16];
-      glGetFloatv(GL_MODELVIEW_MATRIX, mv);
-      for (int j = 0; j < SLICES + 1; j++)
+      vector<double> temp;
+      mesh.clearPoints();
+      for (int i = 0; i < 360; i += 5)
       {
-        float xp = mv[0] * sample[j].x + mv[4] * sample[j].y + mv[8] * sample[j].z + mv[12];
-        float yp = mv[1] * sample[j].x + mv[5] * sample[j].y + mv[9] * sample[j].z + mv[13];
-        float zp = mv[2] * sample[j].x + mv[6] * sample[j].y + mv[10] * sample[j].z + mv[14];
-        float wp = mv[3] * sample[j].x + mv[7] * sample[j].y + mv[11] * sample[j].z + mv[15];
-        wp *= wp;
+        glPushMatrix();
+        glRotated(i, 0.0, 1.0, 0.0);
+        float mv[16];
+        glGetFloatv(GL_MODELVIEW_MATRIX, mv);
+        for (int j = 0; j < SLICES + 1; j++)
+        {
+          float xp = mv[0] * sample[j].x + mv[4] * sample[j].y + mv[8] * sample[j].z + mv[12];
+          float yp = mv[1] * sample[j].x + mv[5] * sample[j].y + mv[9] * sample[j].z + mv[13];
+          float zp = mv[2] * sample[j].x + mv[6] * sample[j].y + mv[10] * sample[j].z + mv[14];
+          float wp = mv[3] * sample[j].x + mv[7] * sample[j].y + mv[11] * sample[j].z + mv[15];
+          wp *= wp;
 
-        xp /= wp;
-        yp /= wp;
-        zp /= wp;
-        temp.push_back(xp);
-        temp.push_back(yp);
-        temp.push_back(zp);
-        mesh.addPoint(temp);
-        temp.pop_back();
-        temp.pop_back();
-        temp.pop_back();
+          xp /= wp;
+          yp /= wp;
+          zp /= wp;
+          temp.push_back(xp);
+          temp.push_back(yp);
+          temp.push_back(zp);
+          mesh.addPoint(temp);
+          temp.pop_back();
+          temp.pop_back();
+          temp.pop_back();
+        }
+        glPopMatrix();
       }
-      glPopMatrix();
+      mesh.setPoints();
+      mesh.computeFaces();
+      mesh.setFaces();
+      mesh.calcEdge();
     }
-    mesh.setPoints();
-    mesh.computeFaces();
-    mesh.setFaces();
-    mesh.calcEdge();
     mesh.drawFaces();
   }
   glutSwapBuffers();
@@ -298,38 +301,55 @@ void activeMotion(int x, int y)
 
 int main(int argc, char** argv)
 {
-  glutInit(&argc, argv);
+  GLuint VertexArrayID;
+  GLuint shaders[2];
+  if(!USE_GLFW)
+  {
+    initGLFW();
+    initShaders(&VertexArrayID, shaders);
+    glfwSetMouseButtonCallback(window, mouseCallback);
+    do
+    {
+      glfwSwapBuffers(window);
+      glfwPollEvents();
+    }while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
+		   glfwWindowShouldClose(window) == 0 );
+  }
+  else
+  {
+    glutInit(&argc, argv);
 
-  glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE );
+    glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE );
 
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_FRONT);
-  glFrontFace(GL_CCW);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    glFrontFace(GL_CCW);
 
-  glutInitWindowSize(WIDTH, HEIGHT);
-  glutInitWindowPosition(25, 25);
-  glutCreateWindow("Surface of Revolution");
-  glViewport(0, 0, 900, 600);
+    glutInitWindowSize(WIDTH, HEIGHT);
+    glutInitWindowPosition(25, 25);
+    glutCreateWindow("Surface of Revolution");
+    glViewport(0, 0, 900, 600);
 
-  glutMouseFunc(mouse);
-  glutDisplayFunc(glutDisplay);
-  //glutIdleFunc(glutDisplay);
-  glutMotionFunc(activeMotion);
-  glutKeyboardFunc(processNormalKeys);
-  glutIgnoreKeyRepeat(1);
+    glutMouseFunc(mouse);
+    glutDisplayFunc(glutDisplay);
+    //glutIdleFunc(glutDisplay);
+    glutMotionFunc(activeMotion);
+    glutKeyboardFunc(processNormalKeys);
+    glutIgnoreKeyRepeat(1);
 
-    // set up lighting
-    glShadeModel( GL_SMOOTH );
-    glEnable( GL_COLOR_MATERIAL );
-    glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE ) ;
-    glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE );
-    glEnable( GL_LIGHTING );
+      // set up lighting
+      glShadeModel( GL_SMOOTH );
+      glEnable( GL_COLOR_MATERIAL );
+      glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE ) ;
+      glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE );
+      glEnable( GL_LIGHTING );
 
-  glEnable( GL_LIGHT0 );
-  GLfloat position[] = { 0, 0, 1, 0 };
-  glLightfv( GL_LIGHT0, GL_POSITION, position );
+    glEnable( GL_LIGHT0 );
+    GLfloat position[] = { 0, 0, 1, 0 };
+    glLightfv( GL_LIGHT0, GL_POSITION, position );
 
-  glutMainLoop();
+    glutMainLoop();
+  }
   return 0;
 }
