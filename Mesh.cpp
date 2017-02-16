@@ -176,6 +176,7 @@ void Mesh::drawFaces()
 
 
   glColor3ub(0.0, 128, 64);
+  glEnable(GL_DEPTH_TEST);
   glEnableClientState( GL_VERTEX_ARRAY );
   glEnableClientState( GL_NORMAL_ARRAY );
   glVertexPointer( 3, GL_FLOAT, sizeof(Vertex), &vertex[0].position );
