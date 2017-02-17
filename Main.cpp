@@ -15,7 +15,8 @@ using namespace glm;
 
 bool complete = 0,
      started=0,
-     unordered_points=1;
+     unordered_points=1,
+     del = 0;
 
 int picked,
     btn,
@@ -24,8 +25,7 @@ int picked,
     radius=200,
     pickIndex,
     count = 0,
-    form = 0,
-    del = 0;
+    form = 0;
 
 double eyeX=0,
        eyeY=4,
@@ -44,72 +44,8 @@ vec3 sample[SLICES + 1];
 Mesh mesh;
 
 
-void drawLine(vec3 a, vec3 b)
-{
-  glColor3f(0.0, 1.0, 1.0);
 
-  glBegin(GL_LINES);
-  glVertex3d(a.x, a.y, a.z);
-  glVertex3d(b.x, b.y, b.z);
-  glEnd();
-}
 
-void drawCircle(double xc, double yc, double radius)
-{
-  glPushMatrix();
-
-  glTranslated(xc, yc, 0.0);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-  glBegin(GL_POLYGON);
-  int sides = (2 * M_PI * radius) / 0.01;
-  for (double i = 0; i < 2 * M_PI; i += M_PI / sides)
-    glVertex3d(cos(i) * radius, sin(i) * radius, 0.0);
-  glEnd();
-
-  glPopMatrix();
-}
-
-vec3 interpolation(vec3 a, vec3 b, double t)
-{
-  vec3 c;
-  c.x = (1 - t)*a.x + t*b.x;
-  c.y = (1 - t)*a.y + t*b.y;
-  c.z = (1 - t)*a.z + t*b.z;
-  return c;
-}
-
-void drawBezier()
-{
-  for (int inc = 0; inc < SLICES; inc++)
-  {
-    drawLine(sample[inc], sample[inc + 1]);
-  }
-}
-
-vec3 calcCasteljau(double t, vector<vec3> points)
-{
-  if(points.size()==1)
-    return points[0];
-  else
-  {
-    vector<vec3> tmp;
-    for(int inc=0; inc<points.size()-1; inc++)
-      tmp.push_back(interpolation(points[inc], points[inc+1], t));
-    return calcCasteljau(t,tmp);
-  }
-}
-
-void computeBezier()
-{
-  double step = 1.0 / SLICES;
-  int inc = 0;
-
-  for (double t = 0; t <= 1 && inc <= SLICES; t += step, inc++)
-  {
-    sample[inc] = calcCasteljau(t,controlPoints);
-  }
-}
 
 void glutDisplay()
 {
@@ -308,8 +244,12 @@ int main(int argc, char** argv)
     initGLFW();
     initShaders(&VertexArrayID, shaders);
     glfwSetMouseButtonCallback(window, mouseCallback);
+    glfwSetKeyCallback(window, keyCallback);
+    glfwSetCursorPosCallback(window, positionCallback);
     do
     {
+      if(!complete)
+        glfwDraw();
       glfwSwapBuffers(window);
       glfwPollEvents();
     }while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
