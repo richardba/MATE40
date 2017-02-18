@@ -12,8 +12,7 @@
 //#define M_PI acos(-1.0)
 #define THE_NUMBER 9e20f
 #define USE_GLFW 0
-#define SLICES 21
-#define SLICES_F 21.0f
+#define SLICES 30.0f
 
 using namespace glm;
 using namespace std;
@@ -40,13 +39,13 @@ extern const vec3 delDot,
 extern double maxCoords[];
 extern bool unordered_points, complete, del, shift;
 extern GLFWwindow* window;
-extern vec3 sample[SLICES];
+extern vec3 sample[(int)SLICES];
 
 
 extern void boundingLimits(double[],vec3);
 extern void initGLFW();
 extern void initShaders(GLuint*, GLuint[]);
-extern void glfwDraw();
+extern void glfwDrawCurve();
 extern vec3 calcCasteljau(double, vector<vec3>);
 extern void computeBezier();
 extern void drawCircle(int, double, double, double);

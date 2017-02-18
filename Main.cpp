@@ -27,7 +27,7 @@ int picked,
     count = 0,
     form = 0;
 
-const float slices=SLICES_F;
+const float slices=SLICES;
 
 double eyeX=0,
        eyeY=4,
@@ -41,7 +41,7 @@ double eyeX=0,
 vector<vec3> controlPoints;
 vector<Vertex> vertex;
 
-vec3 sample[SLICES];
+vec3 sample[(int)SLICES];
 
 Mesh mesh;
 
@@ -246,7 +246,7 @@ int main(int argc, char** argv)
     do
     {
       if(!complete)
-        glfwDraw();
+        glfwDrawCurve();
       glfwSwapBuffers(window);
       glfwPollEvents();
     }while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&

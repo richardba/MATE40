@@ -8,7 +8,7 @@ using namespace glm;
 GLFWwindow* window;
 const vec4 clearColor = vec4(0.5, 1.0, 1.0, 1.0),
            blackColor = vec4(0,0,0,1);
-const vec3 editDot = vec3(0.0, 0.7, 0.5),
+const vec3 editDot = vec3(0.2, .4, 1),
       regDot = vec3(0.0, 0.7, 0.0),
       delDot = vec3(0.3, 0.0, 0.0);
 bool shift=0;
@@ -57,7 +57,6 @@ void initGLFW()
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE); // So that glBegin/glVertex/glEnd work
 
   if(window == NULL)
@@ -176,13 +175,19 @@ void mouseCallback(GLFWwindow* win, int button, int action, int mods)
       picked = 0;
     }
   }
+  if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+  {
+    glClearColor(blackColor.x, blackColor.y, blackColor.z, blackColor.w);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    complete = 1;
+  }
 }
 
 void positionCallback(GLFWwindow *window, double x, double y)
 {
   if (picked)
   {
-    cout << x << endl;
     controlPoints[pickIndex].x = x, controlPoints[pickIndex].y = HEIGHT - y;
   }
 }
@@ -260,7 +265,7 @@ void drawBezier()
   }
 }
 
-void glfwDraw()
+void glfwDrawCurve()
 {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
