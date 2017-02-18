@@ -10,9 +10,10 @@
 #define M_PI		3.14159265358979323846
 #endif // M_PI
 //#define M_PI acos(-1.0)
-#define SLICES 30
 #define THE_NUMBER 9e20f
 #define USE_GLFW 0
+#define SLICES 21
+#define SLICES_F 21.0f
 
 using namespace glm;
 using namespace std;
@@ -28,14 +29,18 @@ struct Vertex
 };
 
 extern int count,picked,pickIndex,form;
+extern const float slices;
 extern vector<Vertex> vertex;
 extern vector<vec3> controlPoints;
-extern const vec4 clearColor;
-extern const vec4 blackColor;
+extern const vec4 clearColor,
+                  blackColor;
+extern const vec3 delDot,
+                  regDot,
+                  editDot;
 extern double maxCoords[];
-extern bool unordered_points, complete, del;
+extern bool unordered_points, complete, del, shift;
 extern GLFWwindow* window;
-extern vec3 sample[];
+extern vec3 sample[SLICES];
 
 
 extern void boundingLimits(double[],vec3);
@@ -44,7 +49,7 @@ extern void initShaders(GLuint*, GLuint[]);
 extern void glfwDraw();
 extern vec3 calcCasteljau(double, vector<vec3>);
 extern void computeBezier();
-extern void drawCircle(double, double, double);
+extern void drawCircle(int, double, double, double);
 extern void drawLine(vec3, vec3);
 extern void drawBezier();
 extern void mouseCallback(GLFWwindow*, int, int, int);

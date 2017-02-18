@@ -27,15 +27,15 @@ void Mesh::computeFaces()
   vector<int> face;
   int i;
 
-  for (i = 0; i < points.size() - SLICES - 1; i++)
+  for (i = 0; i < points.size() - slices - 1; i++)
   {
-    if ((i + 1) % (SLICES + 1) != 0)
+    if ((i + 1) % ((int)slices + 1) != 0)
     {
       noFacePoints.push_back(4);
       face.push_back(i);
       face.push_back(i + 1);
-      face.push_back(i + SLICES + 2);
-      face.push_back(i + SLICES + 1);
+      face.push_back(i + slices + 2);
+      face.push_back(i + slices + 1);
       faces.push_back(face);
       face.pop_back();
       face.pop_back();
@@ -49,8 +49,8 @@ void Mesh::computeFaces()
     noFacePoints.push_back(4);
     face.push_back(i);
     face.push_back(i + 1);
-    face.push_back(i + SLICES + 2 - points.size());
-    face.push_back(i + SLICES + 1 - points.size());
+    face.push_back(i + slices + 2 - points.size());
+    face.push_back(i + slices + 1 - points.size());
     faces.push_back(face);
     face.pop_back();
     face.pop_back();
@@ -74,17 +74,17 @@ void Mesh::drawFaces()
   int i;
   if(unordered_points)
   {
-    for (i = 0; i < points.size() - SLICES - 1; i++)
+    for (i = 0; i < points.size() - slices - 1; i++)
     {
-      if ((i + 1) % (SLICES + 1) != 0)
+      if ((i + 1) % ((int)slices + 1) != 0)
       {
         //UPPER TRIANGLE
 
 
         const vec3 UL = vec3(points[i][0], points[i][1], points[i][2]);
         const vec3 UR = vec3(points[i + 1][0], points[i + 1][1], points[i + 1][2]);
-        const vec3 LL = vec3(points[i+ SLICES+1][0], points[i+SLICES+1][1], points[i+SLICES+1][2]);
-        const vec3 LR = vec3(points[i+ SLICES+2][0], points[i+SLICES+2][1], points[i+SLICES+2][2]);
+        const vec3 LL = vec3(points[i+ slices+1][0], points[i+slices+1][1], points[i+slices+1][2]);
+        const vec3 LR = vec3(points[i+ slices+2][0], points[i+slices+2][1], points[i+slices+2][2]);
 
         const vec3 normal0 = normalize(cross(UR - LL, UL - LL));
         const vec3 normal1 = normalize(cross(LR - LL, UL - LL));
@@ -103,8 +103,8 @@ void Mesh::drawFaces()
     {
       const vec3 UL = vec3(points[i][0], points[i][1], points[i][2]);
       const vec3 UR = vec3(points[i + 1][0], points[i + 1][1], points[i + 1][2]);
-      const vec3 LL = vec3(points[i+ SLICES+1 - points.size()][0], points[i+SLICES+1 - points.size()][1], points[i+SLICES+1 - points.size()][2]);
-      const vec3 LR = vec3(points[i+ SLICES+2 - points.size()][0], points[i+SLICES+2 - points.size()][1], points[i+SLICES+2 - points.size()][2]);
+      const vec3 LL = vec3(points[i+ slices+1 - points.size()][0], points[i+slices+1 - points.size()][1], points[i+slices+1 - points.size()][2]);
+      const vec3 LR = vec3(points[i+ slices+2 - points.size()][0], points[i+slices+2 - points.size()][1], points[i+slices+2 - points.size()][2]);
 
       const vec3 normal0 = normalize(cross(UR - LL, UL - LL));
       const vec3 normal1 = normalize(cross(LR - LL, UL - LL));

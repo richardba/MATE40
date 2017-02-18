@@ -8,6 +8,10 @@ using namespace glm;
 GLFWwindow* window;
 const vec4 clearColor = vec4(0.5, 1.0, 1.0, 1.0),
            blackColor = vec4(0,0,0,1);
+const vec3 editDot = vec3(0.0, 0.7, 0.5),
+      regDot = vec3(0.0, 0.7, 0.0),
+      delDot = vec3(0.3, 0.0, 0.0);
+bool shift=0;
 
 void boundingLimits(double args[], vec3 coord)
 {
@@ -96,8 +100,15 @@ void initShaders(GLuint* VertexArrayID, GLuint shaders[])
 
 void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods)
 {
-    if (key == GLFW_KEY_D && action == GLFW_PRESS)
-      del = 1;
+  if (key == GLFW_KEY_D && action == GLFW_PRESS && controlPoints.size()>1)
+    del ^= 1;
+//  if ((key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) && action == GLFW_PRESS)
+//    shift = 1;
+//  if ((key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) && action == GLFW_RELEASE)
+//    shift = 0;
+//  if((key == GLFW_KEY_KP_ADD || (key == GLFW_KEY_EQUAL && shift)) && action == GLFW_PRESS)
+//    increaseSample();
+
 }
 
 void mouseCallback(GLFWwindow* win, int button, int action, int mods)
@@ -124,15 +135,12 @@ void mouseCallback(GLFWwindow* win, int button, int action, int mods)
       }
     }
 
-    if (!picked)
+    if (!del && !picked)
     {
       vec3 newp;
       newp.x = x;
       newp.y = HEIGHT-y, newp.z = 0;
       controlPoints.push_back(newp);
-      cout<< newp.x <<endl;
-      cout<< newp.y <<endl;
-      cout<< newp.z <<endl;
       ::count++;
     }
 
@@ -152,7 +160,6 @@ void mouseCallback(GLFWwindow* win, int button, int action, int mods)
       form = 1;
     }
   }
-//NAO ESQUECER
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && !complete)
   {
     if (picked)
@@ -164,6 +171,7 @@ void mouseCallback(GLFWwindow* win, int button, int action, int mods)
       if(x<0)
         x=0;
       else if(x>900)
+        x=900;
       controlPoints[pickIndex].x = x, controlPoints[pickIndex].y = HEIGHT - y;
       picked = 0;
     }
@@ -204,45 +212,49 @@ vec3 calcCasteljau(double t, vector<vec3> points)
 
 void computeBezier()
 {
-  double step = 1.0 / SLICES;
+  double step = 1.0 / slices;
   int inc = 0;
 
-  for (double t = 0; t <= 1 && inc <= SLICES; t += step, inc++)
+  for (double t = 0; t <= 1 && inc <= slices; t += step, inc++)
   {
     sample[inc] = calcCasteljau(t,controlPoints);
   }
 }
 
-void drawCircle(double xc, double yc, double radius)
+void drawCircle(int inc, double xc, double yc, double radius)
 {
+  if((pickIndex == inc) && picked)
+    glColor3f(editDot.x,editDot.y,editDot.z);
+  else if(del)
+    glColor3f(delDot.x,delDot.y,delDot.z);
+  else
+    glColor3f(regDot.x,regDot.y,regDot.z);
+
   glPushMatrix();
 
   glTranslated(xc, yc, 0.0);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   glBegin(GL_POLYGON);
-  int sides = (2 * M_PI * radius) / 0.01;
-  for (double i = 0; i < 2 * M_PI; i += M_PI / sides)
-    glVertex3d(cos(i) * radius, sin(i) * radius, 0.0);
+    int sides = (2 * M_PI * radius) / 0.01;
+    for (double i = 0; i < 2 * M_PI; i += M_PI / sides)
+      glVertex3d(cos(i) * radius, sin(i) * radius, 0.0);
   glEnd();
-
   glPopMatrix();
 }
 
 void drawLine(vec3 a, vec3 b)
 {
   glColor3f(0.0, 1.0, 1.0);
-
   glBegin(GL_LINES);
-  glVertex3d(a.x, a.y, a.z);
-  glVertex3d(b.x, b.y, b.z);
+    glVertex3d(a.x, a.y, a.z);
+    glVertex3d(b.x, b.y, b.z);
   glEnd();
 }
 
-
 void drawBezier()
 {
-  for (int inc = 0; inc < SLICES; inc++)
+  for (int inc = 0; inc < slices; inc++)
   {
     drawLine(sample[inc], sample[inc + 1]);
   }
@@ -250,7 +262,6 @@ void drawBezier()
 
 void glfwDraw()
 {
-
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glOrtho(0.0, 900.0, 0.0, 600.0, -900.0, 900.0);
@@ -259,16 +270,7 @@ void glfwDraw()
   glLoadIdentity();
   for (int inc = 0; inc < ::count; inc++)
   {
-    if((pickIndex == inc) && picked)
-      glColor3f(0.0, 0.7, 0.0);
-    else
-      glColor3f(1.0, 0.0, 0.0);
-
-    drawCircle(controlPoints[inc].x, controlPoints[inc].y, 6);
-    glColor3f(0.0, 0.7, 0.0);
-    glBegin(GL_POINTS);
-    glVertex2d(controlPoints[inc].x, controlPoints[inc].y);
-    glEnd();
+    drawCircle(inc, controlPoints[inc].x, controlPoints[inc].y, 6);
   }
 
   if (form)

@@ -27,6 +27,8 @@ int picked,
     count = 0,
     form = 0;
 
+const float slices=SLICES_F;
+
 double eyeX=0,
        eyeY=4,
        eyeZ=25,
@@ -39,7 +41,7 @@ double eyeX=0,
 vector<vec3> controlPoints;
 vector<Vertex> vertex;
 
-vec3 sample[SLICES + 1];
+vec3 sample[SLICES];
 
 Mesh mesh;
 
@@ -68,12 +70,7 @@ void glutDisplay()
 
     for (int inc = 0; inc < ::count; inc++)
     {
-      if((pickIndex == inc) && picked)
-        glColor3f(0.0, 0.7, 0.0);
-      else
-        glColor3f(1.0, 0.0, 0.0);
-
-      drawCircle(controlPoints[inc].x, controlPoints[inc].y, 6);
+      drawCircle(inc, controlPoints[inc].x, controlPoints[inc].y, 6);
       glColor3f(0.0, 0.7, 0.0);
       glBegin(GL_POINTS);
       glVertex2d(controlPoints[inc].x, controlPoints[inc].y);
@@ -108,7 +105,7 @@ void glutDisplay()
         glRotated(i, 0.0, 1.0, 0.0);
         float mv[16];
         glGetFloatv(GL_MODELVIEW_MATRIX, mv);
-        for (int j = 0; j < SLICES + 1; j++)
+        for (int j = 0; j < slices + 1; j++)
         {
           float xp = mv[0] * sample[j].x + mv[4] * sample[j].y + mv[8] * sample[j].z + mv[12];
           float yp = mv[1] * sample[j].x + mv[5] * sample[j].y + mv[9] * sample[j].z + mv[13];
