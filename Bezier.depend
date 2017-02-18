@@ -101,7 +101,7 @@
 
 1487270266 c:\users\ricardo\desktop\mate40\include\shader.h
 
-1487425473 source:c:\users\ricardo.labcg-pc\workspace\mate40\main.cpp
+1487435219 source:c:\users\ricardo.labcg-pc\workspace\mate40\main.cpp
 	<GL/glew.h>
 	<GL/glut.h>
 	<fstream>
@@ -114,12 +114,13 @@
 	"include/Utils.h"
 	"include/Mesh.h"
 
-1487425473 c:\users\ricardo.labcg-pc\workspace\mate40\include\utils.h
+1487435957 c:\users\ricardo.labcg-pc\workspace\mate40\include\utils.h
 	<vector>
 	<GL/glew.h>
 	<GLFW/glfw3.h>
 	<GL/glut.h>
 	<glm/glm.hpp>
+	"Shader.h"
 
 1486660262 c:\users\ricardo.labcg-pc\workspace\mate40\include\mesh.h
 	<vector>
@@ -144,7 +145,7 @@
 
 1487368298 c:\users\ricardo.labcg-pc\workspace\mate40\include\shader.h
 
-1487421637 source:c:\users\ricardo.labcg-pc\workspace\mate40\utils.cpp
+1487434889 source:c:\users\ricardo.labcg-pc\workspace\mate40\utils.cpp
 	"include/Utils.h"
 	<iostream>
 	<vector>

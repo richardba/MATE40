@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <GL/glut.h>
 #include <glm/glm.hpp>
+#include "Shader.h"
 
 #define HEIGHT 600
 #define WIDTH 900
@@ -27,7 +28,7 @@ struct Vertex
     vec3 normal;
 };
 
-extern int count,picked,pickIndex,form;
+extern GLuint count,picked,pickIndex,form;
 extern const float slices;
 extern vector<Vertex> vertex;
 extern vector<vec3> controlPoints;
@@ -45,7 +46,7 @@ extern vec3 sample[(int)SLICES];
 extern void boundingLimits(double[],vec3);
 extern void initGLFW();
 extern void initShaders(GLuint*, GLuint[]);
-extern void glfwDrawCurve();
+extern void glfwDrawCurve(GLuint,GLuint);
 extern vec3 calcCasteljau(double, vector<vec3>);
 extern void computeBezier();
 extern void drawCircle(int, double, double, double);

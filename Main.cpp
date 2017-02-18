@@ -18,14 +18,14 @@ bool complete = 0,
      unordered_points=1,
      del = 0;
 
-int picked,
-    btn,
-    oldX=0,
-    oldY=0,
-    radius=200,
-    pickIndex,
-    count = 0,
-    form = 0;
+GLuint picked,
+       btn,
+       oldX=0,
+       oldY=0,
+       radius=200,
+       pickIndex,
+       count = 0,
+       form = 0;
 
 const float slices=SLICES;
 
@@ -236,6 +236,7 @@ int main(int argc, char** argv)
 {
   GLuint VertexArrayID;
   GLuint shaders[2];
+  GLuint pointsBuffer;
   if(!USE_GLFW)
   {
     initGLFW();
@@ -243,10 +244,14 @@ int main(int argc, char** argv)
     glfwSetMouseButtonCallback(window, mouseCallback);
     glfwSetKeyCallback(window, keyCallback);
     glfwSetCursorPosCallback(window, positionCallback);
+
+    glGenBuffers(1, &pointsBuffer);
+
     do
     {
+      glClear( GL_COLOR_BUFFER_BIT );
       if(!complete)
-        glfwDrawCurve();
+        glfwDrawCurve(shaders[0],pointsBuffer);
       glfwSwapBuffers(window);
       glfwPollEvents();
     }while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
@@ -288,5 +293,9 @@ int main(int argc, char** argv)
 
     glutMainLoop();
   }
+  glDeleteBuffers(1, &pointsBuffer);
+	glDeleteVertexArrays(1, &VertexArrayID);
+	glDeleteProgram(shaders[0]);
+	glDeleteProgram(shaders[1]);
   return 0;
 }

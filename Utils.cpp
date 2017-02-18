@@ -53,11 +53,12 @@ void initGLFW()
   glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
   window = glfwCreateWindow( WIDTH, HEIGHT, "Surface of Revolution", NULL, NULL);
 
-  glfwWindowHint(GLFW_SAMPLES, 1);
+  glfwWindowHint(GLFW_SAMPLES, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE); // So that glBegin/glVertex/glEnd work
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE); // So that glBegin/glVertex/glEnd work
 
   if(window == NULL)
   {
@@ -80,6 +81,7 @@ void initGLFW()
 
 	glEnable (GL_LINE_SMOOTH);
 	glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
+	glPointSize(10);
 }
 
 void initShaders(GLuint* VertexArrayID, GLuint shaders[])
@@ -95,11 +97,13 @@ void initShaders(GLuint* VertexArrayID, GLuint shaders[])
 	}
 	glGenVertexArrays(1, VertexArrayID);
 	glBindVertexArray(*VertexArrayID);
+	shaders[0] = LoadShaders( "2d.vert", "2d.frag" );
+	shaders[1] = LoadShaders( "3d.vert", "3d.frag" );
 }
 
 void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods)
 {
-  if (key == GLFW_KEY_D && action == GLFW_PRESS && controlPoints.size()>1)
+  if ((key == GLFW_KEY_D||key == GLFW_KEY_DELETE) && action == GLFW_PRESS && controlPoints.size()>1)
     del ^= 1;
 //  if ((key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) && action == GLFW_PRESS)
 //    shift = 1;
@@ -179,7 +183,6 @@ void mouseCallback(GLFWwindow* win, int button, int action, int mods)
   {
     glClearColor(blackColor.x, blackColor.y, blackColor.z, blackColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     complete = 1;
   }
 }
@@ -250,7 +253,7 @@ void drawCircle(int inc, double xc, double yc, double radius)
 
 void drawLine(vec3 a, vec3 b)
 {
-  glColor3f(0.0, 1.0, 1.0);
+  glColor3f(1.0, 1.0, 1.0);
   glBegin(GL_LINES);
     glVertex3d(a.x, a.y, a.z);
     glVertex3d(b.x, b.y, b.z);
@@ -265,8 +268,29 @@ void drawBezier()
   }
 }
 
-void glfwDrawCurve()
+void glfwDrawCurve(GLuint shader, GLuint pointsBuffer)
 {
+  if(controlPoints.size())
+  {
+    glUseProgram(shader);
+    cout<<controlPoints.size()<<endl;
+    glBindBuffer(GL_ARRAY_BUFFER, pointsBuffer);
+    glBufferData(GL_ARRAY_BUFFER, controlPoints.size() * sizeof(vec3), controlPoints.data(), GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, pointsBuffer);
+    glVertexAttribPointer(
+      0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+      3,                  // size
+      GL_FLOAT,           // type
+      GL_FALSE,           // normalized?
+      0,                  // stride
+      (void*)0            // array buffer offset
+    );
+    glDrawArrays(GL_POINTS,0,controlPoints.size());
+    glUseProgram(0);
+  }
+
+/*
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glOrtho(0.0, 900.0, 0.0, 600.0, -900.0, 900.0);
@@ -277,11 +301,11 @@ void glfwDrawCurve()
   {
     drawCircle(inc, controlPoints[inc].x, controlPoints[inc].y, 6);
   }
-
+*/
   if (form)
   {
     computeBezier();
-    drawBezier();
+    //drawBezier();
   }
 }
 
