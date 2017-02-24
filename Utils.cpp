@@ -110,10 +110,6 @@ void mouseCallback(GLFWwindow* win, int button, int action, int mods)
         glClearColor(blackColor.x, blackColor.y, blackColor.z, blackColor.w);
       }
     }
-    if(controlPoints.size())
-    {
-      computeBezier();
-    }
   }
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && !complete)
   {
@@ -132,6 +128,10 @@ void mouseCallback(GLFWwindow* win, int button, int action, int mods)
       glClearColor(blackColor.x, blackColor.y, blackColor.z, blackColor.w);
       currentColor = regColor;
     }
+  }
+  if(controlPoints.size())
+  {
+    computeBezier();
   }
   if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
   {
