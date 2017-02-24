@@ -14,6 +14,8 @@
 #define THE_NUMBER 9e20f
 #define USE_GLFW 0
 #define SLICES 30.0f
+#define M_DIST 0.00015f
+#define GL_TYPE_3D 3
 
 using namespace glm;
 using namespace std;
@@ -31,18 +33,18 @@ struct Vertex
 extern GLuint count,picked,pickIndex,form;
 extern const float slices;
 extern vector<Vertex> vertex;
-extern vector<vec3> controlPoints;
+extern vector<vec3> controlPoints,sample;
 extern const vec4 clearColor,
                   blackColor;
-extern const vec3 delDot,
-                  regDot,
-                  editDot;
+extern const vec3 delBackground,
+                  regColor,
+                  editBackground;
+extern vec3 currentColor;
 extern double maxCoords[];
 extern bool unordered_points, complete, del, shift;
 extern GLFWwindow* window;
-extern vec3 sample[(int)SLICES];
 
-
+extern void draw(GLuint, GLuint, GLuint, GLuint, GLuint, vec3, vector<vec3>);
 extern void boundingLimits(double[],vec3);
 extern void initGLFW();
 extern void initShaders(GLuint*, GLuint[]);

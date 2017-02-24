@@ -1,12 +1,21 @@
 #version 330 core
 
 // Ouput data
-out vec3 color;
+out vec4 color;
+
+uniform vec3 elementColor;
 
 void main()
 {
+  float r = 0.0, alpha = 1.0;
+  if(elementColor.x!=1){
+    	vec2 cxy = 2.0 * gl_PointCoord - 1.0;
+        r = dot(cxy, cxy);
+    if (r > 1.0) {
+        discard;
+    }
+  }
 
-	// Output color = red
-	color = vec3(1,0,0);
+	color = vec4(elementColor,1);
 
 }

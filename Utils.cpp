@@ -8,9 +8,12 @@ using namespace glm;
 GLFWwindow* window;
 const vec4 clearColor = vec4(0.5, 1.0, 1.0, 1.0),
            blackColor = vec4(0,0,0,1);
-const vec3 editDot = vec3(0.2, .4, 1),
-      regDot = vec3(0.0, 0.7, 0.0),
-      delDot = vec3(0.3, 0.0, 0.0);
+const vec3 editBackground = vec3(0.025, .05, 0.1),
+      regColor = vec3(0.0, 0.7, 0.0),
+      delBackground = vec3(0.1, 0.0, 0.0),
+      delColor = vec3(0.8,0.2,0.05),
+      editColor = vec3(0.1,0.3,0.9);
+vec3 currentColor;
 bool shift=0;
 
 void boundingLimits(double args[], vec3 coord)
@@ -41,70 +44,22 @@ void boundingLimits(double args[], vec3 coord)
   }
 }
 
-void initGLFW()
-{
-  int tmp;
-  if(!glfwInit())
-	{
-		cout << "Erro ao inicializar o GLFW!" << endl;
-		cin >> tmp;
-		exit(EXIT_FAILURE);
-	}
-  glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-  window = glfwCreateWindow( WIDTH, HEIGHT, "Surface of Revolution", NULL, NULL);
-
-  glfwWindowHint(GLFW_SAMPLES, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE); // So that glBegin/glVertex/glEnd work
-
-  if(window == NULL)
-  {
-    cout << "Falha ao inicializar o GLFW" << endl;
-    cin >> tmp;
-    glfwTerminate();
-    exit(EXIT_FAILURE);
-  }
-  glfwMakeContextCurrent(window);
-  glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-    glfwPollEvents();
-    glfwSetCursorPos(window, WIDTH/2, HEIGHT/2);
-
-  glClearColor(blackColor.x, blackColor.y, blackColor.z, blackColor.w);
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
-  glEnable(GL_CULL_FACE);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable (GL_BLEND);
-
-	glEnable (GL_LINE_SMOOTH);
-	glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-	glPointSize(10);
-}
-
-void initShaders(GLuint* VertexArrayID, GLuint shaders[])
-{
-  glewExperimental = true;
-	if (glewInit() != GLEW_OK)
-  {
-		cout << "Erro ao inicializar o GLEW!" << endl;
-		int tmp;
-		cin >> tmp;
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
-	glGenVertexArrays(1, VertexArrayID);
-	glBindVertexArray(*VertexArrayID);
-	shaders[0] = LoadShaders( "2d.vert", "2d.frag" );
-	shaders[1] = LoadShaders( "3d.vert", "3d.frag" );
-}
-
 void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods)
 {
   if ((key == GLFW_KEY_D||key == GLFW_KEY_DELETE) && action == GLFW_PRESS && controlPoints.size()>1)
+  {
+    if(!del)
+    {
+      glClearColor(delBackground.x,delBackground.y,delBackground.z,1);
+      currentColor = delColor;
+    }
+    else
+    {
+      glClearColor(blackColor.x, blackColor.y, blackColor.z, blackColor.w);
+      currentColor = regColor;
+    }
     del ^= 1;
+  }
 //  if ((key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) && action == GLFW_PRESS)
 //    shift = 1;
 //  if ((key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) && action == GLFW_RELEASE)
@@ -118,31 +73,27 @@ void mouseCallback(GLFWwindow* win, int button, int action, int mods)
 {
   double x,y;
   glfwGetCursorPos(window,&x,&y);
-
- /* if( button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && complete )
-  {
-    oldX = x;
-    oldY = y;
-
-    glutPostRedisplay();
-  }*/
-
+  x=x/(WIDTH/2)-1;
+  y=-(y/(HEIGHT/2)-1);
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !complete)
   {
     for (int inc = 0; inc < ::count; inc++)
     {
-      if ((pow((double)(controlPoints[inc].x - x), 2)) + (pow((double)(controlPoints[inc].y - HEIGHT + y), 2)) <= pow((double)10, 2))
+      if(pow(controlPoints[inc].x - x,2) + pow(controlPoints[inc].y - y,2)<M_DIST)
       {
-        picked = 1;
-        pickIndex = inc;
+        currentColor = editColor;
+        picked=1;
+        pickIndex=inc;
+        glClearColor(editBackground.x, editBackground.y, editBackground.z, 1);
       }
     }
 
     if (!del && !picked)
     {
+      currentColor = regColor;
       vec3 newp;
       newp.x = x;
-      newp.y = HEIGHT-y, newp.z = 0;
+      newp.y = y, newp.z = 0;
       controlPoints.push_back(newp);
       ::count++;
     }
@@ -156,27 +107,30 @@ void mouseCallback(GLFWwindow* win, int button, int action, int mods)
         ::count--;
         picked = 0;
         pickIndex = -1;
+        glClearColor(blackColor.x, blackColor.y, blackColor.z, blackColor.w);
       }
     }
-    if(!controlPoints.empty())
+    if(controlPoints.size())
     {
-      form = 1;
+      computeBezier();
     }
   }
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && !complete)
   {
     if (picked)
     {
-      if(y<0)
-        y=0;
-      else if(y>600)
-        y=600;
-      if(x<0)
-        x=0;
-      else if(x>900)
-        x=900;
-      controlPoints[pickIndex].x = x, controlPoints[pickIndex].y = HEIGHT - y;
+      if(y<-1)
+        y=-1;
+      else if(y>1)
+        y=1;
+      if(x<-1)
+        x=-1;
+      else if(x>1)
+        x=1;
+      controlPoints[pickIndex].x = x, controlPoints[pickIndex].y = y;
       picked = 0;
+      glClearColor(blackColor.x, blackColor.y, blackColor.z, blackColor.w);
+      currentColor = regColor;
     }
   }
   if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
@@ -189,9 +143,11 @@ void mouseCallback(GLFWwindow* win, int button, int action, int mods)
 
 void positionCallback(GLFWwindow *window, double x, double y)
 {
+  double xPos=x/(WIDTH/2)-1, yPos=-(y/(HEIGHT/2)-1);
   if (picked)
   {
-    controlPoints[pickIndex].x = x, controlPoints[pickIndex].y = HEIGHT - y;
+    controlPoints[pickIndex].x = xPos, controlPoints[pickIndex].y = yPos;
+    computeBezier();
   }
 }
 
@@ -203,7 +159,6 @@ vec3 interpolation(vec3 a, vec3 b, double t)
   c.z = (1 - t)*a.z + t*b.z;
   return c;
 }
-
 
 vec3 calcCasteljau(double t, vector<vec3> points)
 {
@@ -222,93 +177,45 @@ void computeBezier()
 {
   double step = 1.0 / slices;
   int inc = 0;
-
+  sample.clear();
   for (double t = 0; t <= 1 && inc <= slices; t += step, inc++)
   {
-    sample[inc] = calcCasteljau(t,controlPoints);
+    sample.push_back(calcCasteljau(t,controlPoints));
   }
 }
 
-void drawCircle(int inc, double xc, double yc, double radius)
+void draw(GLuint arrayAtribSize,
+          GLuint buffer,
+          GLuint colorUniform,
+          GLuint drawType,
+          GLuint shader,
+          vec3 color,
+          vector<vec3> data)
 {
-  if((pickIndex == inc) && picked)
-    glColor3f(editDot.x,editDot.y,editDot.z);
-  else if(del)
-    glColor3f(delDot.x,delDot.y,delDot.z);
-  else
-    glColor3f(regDot.x,regDot.y,regDot.z);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer);
+  glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(vec3), &data[0], GL_DYNAMIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glUseProgram(shader);
 
-  glPushMatrix();
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glUniform3f(colorUniform, color.x, color.y, color.z);
+  glEnableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer);
+  glVertexAttribPointer(
+    0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+    arrayAtribSize,                  // size
+    GL_FLOAT,           // type
+    GL_FALSE,           // normalized?
+    0,                  // stride
+    (void*)0            // array buffer offset
+  );
 
-  glTranslated(xc, yc, 0.0);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  glDrawArrays(drawType, 0, data.size());
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glDisableVertexAttribArray(0);
+  glUseProgram(0);
 
-  glBegin(GL_POLYGON);
-    int sides = (2 * M_PI * radius) / 0.01;
-    for (double i = 0; i < 2 * M_PI; i += M_PI / sides)
-      glVertex3d(cos(i) * radius, sin(i) * radius, 0.0);
-  glEnd();
-  glPopMatrix();
 }
-
-void drawLine(vec3 a, vec3 b)
-{
-  glColor3f(1.0, 1.0, 1.0);
-  glBegin(GL_LINES);
-    glVertex3d(a.x, a.y, a.z);
-    glVertex3d(b.x, b.y, b.z);
-  glEnd();
-}
-
-void drawBezier()
-{
-  for (int inc = 0; inc < slices; inc++)
-  {
-    drawLine(sample[inc], sample[inc + 1]);
-  }
-}
-
-void glfwDrawCurve(GLuint shader, GLuint pointsBuffer)
-{
-  if(controlPoints.size())
-  {
-    glUseProgram(shader);
-    cout<<controlPoints.size()<<endl;
-    glBindBuffer(GL_ARRAY_BUFFER, pointsBuffer);
-    glBufferData(GL_ARRAY_BUFFER, controlPoints.size() * sizeof(vec3), controlPoints.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, pointsBuffer);
-    glVertexAttribPointer(
-      0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-      3,                  // size
-      GL_FLOAT,           // type
-      GL_FALSE,           // normalized?
-      0,                  // stride
-      (void*)0            // array buffer offset
-    );
-    glDrawArrays(GL_POINTS,0,controlPoints.size());
-    glUseProgram(0);
-  }
-
-/*
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glOrtho(0.0, 900.0, 0.0, 600.0, -900.0, 900.0);
-  glMatrixMode(GL_MODELVIEW);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glLoadIdentity();
-  for (int inc = 0; inc < ::count; inc++)
-  {
-    drawCircle(inc, controlPoints[inc].x, controlPoints[inc].y, 6);
-  }
-*/
-  if (form)
-  {
-    computeBezier();
-    //drawBezier();
-  }
-}
-
 
 
 
