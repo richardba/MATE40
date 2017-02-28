@@ -39,6 +39,7 @@ extern double maxCoords[];
 extern bool unordered_points, complete, del, shift;
 extern GLFWwindow* window;
 extern vector<vec2> uvs;
+extern vector<unsigned short> indices;
 
 extern vec3 calcCasteljau(double, vector<vec3>);
 extern void surfaceRevolution( const vector<vec3>& pts, unsigned int segments = 32);

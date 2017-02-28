@@ -192,9 +192,9 @@ void surfaceRevolution(mat4 mvp)
     mv = glm::rotate(mv, (float)i, vec3(0,1,0));
     for (int j = 0; j < SLICES + 1; j++)
     {
-      float xp = mv[0].x * sample[j].x + mv[0].y * sample[j].y + mv[0].z * sample[j].z + mv[0].w;
-      float yp = mv[1].x * sample[j].x + mv[1].y * sample[j].y + mv[1].z * sample[j].z + mv[1].w;
-      float zp = mv[2].x * sample[j].x + mv[2].y * sample[j].y + mv[2].z * sample[j].z + mv[2].w;
+      float xp = 10+(mv[0].x * sample[j].x + mv[0].y * sample[j].y + mv[0].z * sample[j].z + mv[0].w);
+      float yp = (mv[1].x * sample[j].x + mv[1].y * sample[j].y + mv[1].z * sample[j].z + mv[1].w);
+      float zp = 10+(mv[2].x * sample[j].x + mv[2].y * sample[j].y + mv[2].z * sample[j].z + mv[2].w);
       float wp = mv[3].x * sample[j].x + mv[3].y * sample[j].y + mv[3].z * sample[j].z + mv[3].w;
       wp *= wp;
 
@@ -204,6 +204,82 @@ void surfaceRevolution(mat4 mvp)
 
       vertex.push_back(vec3(xp,yp,zp));
     }
+  }
+  int i;
+  if(unordered_points)
+  {
+    for (i = 0; i < vertex.size() - slices - 1; i++)
+    {
+      if ((i + 1) % ((int)slices + 1) != 0)
+      {
+        const unsigned short UL_index = i,
+                             UR_index = i+1,
+                             LL_index = i+slices+1,
+                             LR_index = i+slices+2;
+        const vec3 UL = vec3(vertex[UL_index][0], vertex[UL_index][1], vertex[UL_index][2]);
+        const vec3 UR = vec3(vertex[UR_index][0], vertex[UR_index][1], vertex[UR_index][2]);
+        const vec3 LL = vec3(vertex[LL_index][0], vertex[LL_index][1], vertex[LL_index][2]);
+        const vec3 LR = vec3(vertex[LR_index][0], vertex[LR_index][1], vertex[LR_index][2]);
+        cout << UL.z << endl;
+        const vec3 normal0 = normalize(cross(UR - LL, UL - LL));
+        const vec3 normal1 = normalize(cross(LR - LL, UL - LL));
+
+        indices.push_back( LL_index );
+        indices.push_back( UR_index );
+        indices.push_back( UL_index );
+        normals.push_back(normal0);
+        normals.push_back(normal0);
+        normals.push_back(normal0);
+
+        indices.push_back( LL_index );
+        indices.push_back( LR_index );
+        indices.push_back( UR_index );
+        normals.push_back(normal1);
+        normals.push_back(normal1);
+        normals.push_back(normal1);
+
+        uvs.push_back(calcUV(UL));
+        uvs.push_back(calcUV(UR));
+        uvs.push_back(calcUV(LL));
+        uvs.push_back(calcUV(LR));
+      }
+    }
+
+    for (; i < vertex.size() - 1; i++)
+    {
+      const unsigned short UL_index = i,
+                           UR_index = i+1,
+                           LL_index = i+slices+1 - vertex.size(),
+                           LR_index = i+slices+2 - vertex.size();
+      const vec3 UL = vec3(vertex[UL_index][0], vertex[UL_index][1], vertex[UL_index][2]);
+      const vec3 UR = vec3(vertex[UR_index][0], vertex[UR_index][1], vertex[UR_index][2]);
+      const vec3 LL = vec3(vertex[LL_index][0], vertex[LL_index][1], vertex[LL_index][2]);
+      const vec3 LR = vec3(vertex[LR_index][0], vertex[LR_index][1], vertex[LR_index][2]);
+
+      const vec3 normal0 = normalize(cross(UR - LL, UL - LL));
+      const vec3 normal1 = normalize(cross(LR - LL, UL - LL));
+
+        indices.push_back( LL_index );
+        indices.push_back( UR_index );
+        indices.push_back( UL_index );
+        normals.push_back(normal0);
+        normals.push_back(normal0);
+        normals.push_back(normal0);
+
+        indices.push_back( LL_index );
+        indices.push_back( LR_index );
+        indices.push_back( UR_index );
+        normals.push_back(normal1);
+        normals.push_back(normal1);
+        normals.push_back(normal1);
+
+        uvs.push_back(calcUV(UL));
+        uvs.push_back(calcUV(UR));
+        uvs.push_back(calcUV(LL));
+        uvs.push_back(calcUV(LR));
+
+    }
+    unordered_points=0;
   }
 }
 

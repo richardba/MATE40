@@ -40,6 +40,7 @@ double eyeX=0,
 vector<vec2> uvs;
 vector<vec3> controlPoints, sample;
 vector<vec3> vertex, normals;
+vector<unsigned short> indices;
 
 
 int main( void )
@@ -147,6 +148,14 @@ int main( void )
       draw(GL_TYPE_3D, lineBuffer, color, GL_LINE_STRIP, shaders[0], vec3(1), sample);
     } else if(complete)
     {
+      computeMatricesFromInputs();
+      mat4 ProjectionMatrix = getProjectionMatrix();
+      mat4 ViewMatrix = getViewMatrix();
+      mat4 ModelMatrix = glm::mat4(1.0);
+      mat4 ModelViewMatrix = ViewMatrix * ModelMatrix;
+      mat3 ModelView3x3Matrix = glm::mat3(ModelViewMatrix);
+
+      mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
       glUseProgram(shaders[1]);
       if(vertex.empty())
       {
@@ -168,14 +177,6 @@ int main( void )
         glBufferData(GL_ARRAY_BUFFER, sizeof(vec3)*normals.size(), &normals[0], GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
       }
-      computeMatricesFromInputs();
-      mat4 ProjectionMatrix = getProjectionMatrix();
-      mat4 ViewMatrix = getViewMatrix();
-      mat4 ModelMatrix = glm::mat4(1.0);
-      mat4 ModelViewMatrix = ViewMatrix * ModelMatrix;
-      mat3 ModelView3x3Matrix = glm::mat3(ModelViewMatrix);
-
-      mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
       glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
       glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
