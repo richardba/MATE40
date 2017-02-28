@@ -21,9 +21,9 @@ class Mesh
 
   private:
   int pointsNo, facesNo, edgesNo;
-  vector<vector<double> > points;
+  vector< vector<double> > points;
   vector<int> noFacePoints;
-  vector<vector<int> > faces;
+  vector< vector<int> > faces;
 };
 
 #endif // MESH_H

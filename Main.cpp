@@ -94,7 +94,8 @@ int main( void )
 
 	GLuint shaders[] = {LoadShaders( "2d.vert", "2d.frag" ), LoadShaders( "3d.vert", "3d.frag" )};
   GLuint pointsBuffer,
-         lineBuffer;
+         lineBuffer,
+         surfaceBuffer;
   glGenBuffers(1, &pointsBuffer);
   glBindBuffer(GL_ARRAY_BUFFER, pointsBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vec3), &controlPoints[0], GL_DYNAMIC_DRAW);
@@ -105,7 +106,13 @@ int main( void )
   glBufferData(GL_ARRAY_BUFFER, sizeof(vec3), &sample[0], GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+  glGenBuffers(1, &surfaceBuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, surfaceBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex), &vertex[0], GL_DYNAMIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
   GLuint color = glGetUniformLocation(shaders[0], "elementColor");
+
 	do
   {
     glClear( GL_COLOR_BUFFER_BIT );
@@ -121,7 +128,18 @@ int main( void )
       draw(GL_TYPE_3D, lineBuffer, color, GL_LINE_STRIP, shaders[0], vec3(1), sample);
     } else if(complete)
     {
-
+      computeMatricesFromInputs();
+      mat4 ProjectionMatrix = getProjectionMatrix();
+      mat4 ViewMatrix = getViewMatrix();
+      mat4 ModelMatrix = glm::mat4(1.0);
+      mat4 ModelViewMatrix = ViewMatrix * ModelMatrix;
+      mat3 ModelView3x3Matrix = glm::mat3(ModelViewMatrix);
+      mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+      drawSurface(surfaceBuffer,
+          color,
+          shaders[0],
+          vec3(0),
+          vertex);
     }
 
 
@@ -131,6 +149,7 @@ int main( void )
 	} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
 		   glfwWindowShouldClose(window) == 0 );
+  vertex.clear();
 
 	// Cleanup VBO
 	glDeleteBuffers(1, &pointsBuffer);

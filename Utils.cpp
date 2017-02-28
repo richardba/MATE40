@@ -66,7 +66,6 @@ void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods)
 //    shift = 0;
 //  if((key == GLFW_KEY_KP_ADD || (key == GLFW_KEY_EQUAL && shift)) && action == GLFW_PRESS)
 //    increaseSample();
-
 }
 
 void mouseCallback(GLFWwindow* win, int button, int action, int mods)
@@ -138,6 +137,9 @@ void mouseCallback(GLFWwindow* win, int button, int action, int mods)
     glClearColor(blackColor.x, blackColor.y, blackColor.z, blackColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     complete = 1;
+    vertex = surfaceRevolution(sample);
+    controlPoints.clear();
+    sample.clear();
   }
 }
 
@@ -184,6 +186,55 @@ void computeBezier()
   }
 }
 
+
+vector<Vertex> surfaceRevolution( const vector<vec3>& pts, unsigned int segments )
+{
+  vector<vec2> circlePts;
+  for( unsigned int i = 0; i <= segments; ++i )
+  {
+    float angle = (i / (float)segments) * M_PI * 2.0f;
+    circlePts.push_back( vec2( cos( angle ), sin( angle ) ) );
+  }
+
+  typedef vector<vec3> Layer;
+  typedef vector<Layer> Layers;
+  Layers layers( pts.size(), Layer( circlePts.size() ) );
+  for( size_t i = 0; i < pts.size(); ++i )
+  {
+    for( unsigned int j = 0; j < circlePts.size(); ++j )
+    {
+        layers[i][j] = vec3( circlePts[j] * pts[i].x, pts[i].y );
+    }
+  }
+
+  vector<Vertex> verts;
+  for( size_t i = 1; i < layers.size(); ++i )
+  {
+    const Layer& prvLayer = layers[ i-1 ];
+    const Layer& curLayer = layers[ i-0 ];
+    for( size_t j = 1; j < circlePts.size(); ++j )
+    {
+      const vec3& LL = prvLayer[ j-1 ];
+      const vec3& LR = prvLayer[ j-0 ];
+      const vec3& UL = curLayer[ j-1 ];
+      const vec3& UR = curLayer[ j-0 ];
+      cout << LL.z << endl;
+
+      const vec3 normal0 = normalize( cross( UR - LL, UL - LL ) );
+      verts.push_back( Vertex( LL, normal0 ) );
+      verts.push_back( Vertex( UR, normal0 ) );
+      verts.push_back( Vertex( UL, normal0 ) );
+
+      const vec3 normal1 = normalize( cross( LR - LL, UL - LL ) );
+      verts.push_back( Vertex( LL, normal1 ) );
+      verts.push_back( Vertex( LR, normal1 ) );
+      verts.push_back( Vertex( UR, normal1 ) );
+    }
+  }
+
+  return verts;
+}
+
 void draw(GLuint arrayAtribSize,
           GLuint buffer,
           GLuint colorUniform,
@@ -217,5 +268,37 @@ void draw(GLuint arrayAtribSize,
 
 }
 
+void drawSurface(GLuint buffer,
+          GLuint colorUniform,
+          GLuint shader,
+          vec3 color,
+          vector<Vertex> data,
+          GLuint arrayAtribSize,
+          GLuint drawType)
+{
+  glBindBuffer(GL_ARRAY_BUFFER, buffer);
+  glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(Vertex), &data[0], GL_DYNAMIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glUseProgram(shader);
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glUniform3f(colorUniform, color.x, color.y, color.z);
+  glEnableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer);
+  glVertexAttribPointer(
+    0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+    arrayAtribSize,                  // size
+    GL_FLOAT,           // type
+    GL_FALSE,           // normalized?
+    0,                  // stride
+    (void*)0            // array buffer offset
+  );
+
+  glDrawArrays(drawType, 0, data.size());
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glDisableVertexAttribArray(0);
+  glUseProgram(0);
+
+}
 
 

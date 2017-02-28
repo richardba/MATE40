@@ -44,16 +44,24 @@ extern double maxCoords[];
 extern bool unordered_points, complete, del, shift;
 extern GLFWwindow* window;
 
-extern void draw(GLuint, GLuint, GLuint, GLuint, GLuint, vec3, vector<vec3>);
-extern void boundingLimits(double[],vec3);
-extern void initGLFW();
-extern void initShaders(GLuint*, GLuint[]);
-extern void glfwDrawCurve(GLuint,GLuint);
 extern vec3 calcCasteljau(double, vector<vec3>);
+extern vector<Vertex> surfaceRevolution( const vector<vec3>& pts, unsigned int segments = 32);
+extern void boundingLimits(double[],vec3);
 extern void computeBezier();
+extern void draw(GLuint, GLuint, GLuint, GLuint, GLuint, vec3, vector<vec3>);
+extern void drawBezier();
 extern void drawCircle(int, double, double, double);
 extern void drawLine(vec3, vec3);
-extern void drawBezier();
-extern void mouseCallback(GLFWwindow*, int, int, int);
+extern void drawSurface(GLuint buffer,
+                        GLuint colorUniform,
+                        GLuint shader,
+                        vec3 color,
+                        vector<Vertex> data,
+                        GLuint arrayAtribSize=GL_TYPE_3D,
+                        GLuint drawType=GL_TRIANGLES);
+extern void glfwDrawCurve(GLuint,GLuint);
+extern void initGLFW();
+extern void initShaders(GLuint*, GLuint[]);
 extern void keyCallback(GLFWwindow*, int, int, int, int);
+extern void mouseCallback(GLFWwindow*, int, int, int);
 extern void positionCallback(GLFWwindow *, double, double);
