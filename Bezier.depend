@@ -24,7 +24,7 @@
 	"include/utils.h"
 	<iostream>
 
-1488244786 source:c:\users\richardba\workspace\mate40\main.cpp
+1488264858 source:c:\users\richardba\workspace\mate40\main.cpp
 	<GL/glew.h>
 	<GL/glut.h>
 	<fstream>
@@ -35,24 +35,22 @@
 	<stdlib.h>
 	<vector>
 	"include/Utils.h"
-	"include/Mesh.h"
 
-1488244876 c:\users\richardba\workspace\mate40\include\utils.h
+1488264764 c:\users\richardba\workspace\mate40\include\utils.h
 	<vector>
 	<GL/glew.h>
 	<GLFW/glfw3.h>
 	<GL/glut.h>
 	<glm/glm.hpp>
+	"Controls.h"
 	"Shader.h"
+	"Texture.h"
 
-1488243295 c:\users\richardba\workspace\mate40\include\mesh.h
+1488248698 c:\users\richardba\workspace\mate40\include\mesh.h
 	<vector>
+	<glm/glm.hpp>
 
-1487952718 source:c:\users\richardba\workspace\mate40\mesh.cpp
-	"include/Mesh.h"
-	"include/Utils.h"
-	<iostream>
-	<climits>
+1488264773 source:c:\users\richardba\workspace\mate40\mesh.cpp
 
 1487277112 source:c:\users\ricardo\desktop\mate40\main.cpp
 	<GL/glew.h>
@@ -165,8 +163,26 @@
 
 1487952718 c:\users\richardba\workspace\mate40\include\shader.h
 
-1488244786 source:c:\users\richardba\workspace\mate40\utils.cpp
+1488264821 source:c:\users\richardba\workspace\mate40\utils.cpp
 	"include/Utils.h"
 	<iostream>
 	<vector>
+	<glm/gtc/matrix_transform.hpp>
+
+1488247218 source:c:\users\richardba\workspace\mate40\controls.cpp
+	<GLFW/glfw3.h>
+	<glm/glm.hpp>
+	<glm/gtc/matrix_transform.hpp>
+	"include/Controls.h"
+
+1488247178 c:\users\richardba\workspace\mate40\include\controls.h
+
+1488262076 c:\users\richardba\workspace\mate40\include\texture.h
+
+1488262050 source:c:\users\richardba\workspace\mate40\texture.cpp
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<GL/glew.h>
+	<GLFW/glfw3.h>
 

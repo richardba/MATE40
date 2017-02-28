@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <vector>
 #include "include/Utils.h"
-#include "include/Mesh.h"
 
 using namespace std;
 using namespace glm;
@@ -38,10 +37,10 @@ double eyeX=0,
        theta=0,
        phi=0;
 
+vector<vec2> uvs;
 vector<vec3> controlPoints, sample;
-vector<Vertex> vertex;
+vector<vec3> vertex, normals;
 
-Mesh mesh;
 
 int main( void )
 {
@@ -108,10 +107,30 @@ int main( void )
 
   glGenBuffers(1, &surfaceBuffer);
   glBindBuffer(GL_ARRAY_BUFFER, surfaceBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex), &vertex[0], GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vec3), &vertex[0], GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  GLuint color = glGetUniformLocation(shaders[0], "elementColor");
+	GLuint uvBuffer;
+	glGenBuffers(1, &uvBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vec2), &uvs[0], GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	GLuint normalBuffer;
+	glGenBuffers(1, &normalBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vec3), &normals[0], GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  GLuint color         = glGetUniformLocation(shaders[0], "elementColor");
+  GLuint MatrixID      = glGetUniformLocation(shaders[1], "MVP");
+  GLuint ViewMatrixID  = glGetUniformLocation(shaders[1], "V");
+  GLuint ModelMatrixID = glGetUniformLocation(shaders[1], "M");
+  GLuint LightID       = glGetUniformLocation(shaders[1], "LightPosition_worldspace");
+  GLuint TextureID     = glGetUniformLocation(shaders[1], "texture");
+
+  GLuint Texture = loadDDS("texture.dds");
+
 
 	do
   {
@@ -128,36 +147,107 @@ int main( void )
       draw(GL_TYPE_3D, lineBuffer, color, GL_LINE_STRIP, shaders[0], vec3(1), sample);
     } else if(complete)
     {
+      glUseProgram(shaders[1]);
+      if(vertex.empty())
+      {
+        surfaceRevolution(sample);
+        glGenBuffers(1, &surfaceBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, surfaceBuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vec3)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        GLuint uvBuffer;
+        glGenBuffers(1, &uvBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vec2)*uvs.size(), &uvs[0], GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        GLuint normalBuffer;
+        glGenBuffers(1, &normalBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vec3)*normals.size(), &normals[0], GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+      }
       computeMatricesFromInputs();
       mat4 ProjectionMatrix = getProjectionMatrix();
       mat4 ViewMatrix = getViewMatrix();
       mat4 ModelMatrix = glm::mat4(1.0);
       mat4 ModelViewMatrix = ViewMatrix * ModelMatrix;
       mat3 ModelView3x3Matrix = glm::mat3(ModelViewMatrix);
+
       mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
-      drawSurface(surfaceBuffer,
-          color,
-          shaders[0],
-          vec3(0),
-          vertex);
+
+      glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+      glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+      glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
+
+      glm::vec3 lightPos = glm::vec3(4,4,4);
+      glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
+
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, Texture);
+      glUniform1i(TextureID, 0);
+      glEnableVertexAttribArray(0);
+      glBindBuffer(GL_ARRAY_BUFFER, surfaceBuffer);
+      glVertexAttribPointer(
+        0,                  // attribute
+        3,                  // size
+        GL_FLOAT,           // type
+        GL_FALSE,           // normalized?
+        0,                  // stride
+        (void*)0            // array buffer offset
+      );
+
+      // 2nd attribute buffer : UVs
+      glEnableVertexAttribArray(1);
+      glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
+      glVertexAttribPointer(
+        1,                                // attribute
+        2,                                // size
+        GL_FLOAT,                         // type
+        GL_FALSE,                         // normalized?
+        0,                                // stride
+        (void*)0                          // array buffer offset
+      );
+
+      // 3rd attribute buffer : normals
+      glEnableVertexAttribArray(2);
+      glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+      glVertexAttribPointer(
+        2,                                // attribute
+        3,                                // size
+        GL_FLOAT,                         // type
+        GL_FALSE,                         // normalized?
+        0,                                // stride
+        (void*)0                          // array buffer offset
+      );
+
+      // Draw the triangles !
+      glDrawArrays(GL_TRIANGLES, 0, vertex.size() );
+
+      glDisableVertexAttribArray(0);
+      glDisableVertexAttribArray(1);
+      glDisableVertexAttribArray(2);
+      glUseProgram(shaders[0]);
     }
 
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-	} // Check if the ESC key was pressed or the window was closed
+	}
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
 		   glfwWindowShouldClose(window) == 0 );
   vertex.clear();
 
-	// Cleanup VBO
 	glDeleteBuffers(1, &pointsBuffer);
+	glDeleteBuffers(1, &surfaceBuffer);
+	glDeleteBuffers(1, &normalBuffer);
+	glDeleteBuffers(1, &uvBuffer);
 	glDeleteVertexArrays(1, &VertexArrayID);
 	glDeleteProgram(shaders[0]);
 	glDeleteProgram(shaders[1]);
 
-	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
 
 	return 0;

@@ -1,6 +1,7 @@
 #include "include/Utils.h"
 #include <iostream>
 #include <vector>
+#include <glm/gtc/matrix_transform.hpp>
 
 using namespace std;
 using namespace glm;
@@ -137,9 +138,6 @@ void mouseCallback(GLFWwindow* win, int button, int action, int mods)
     glClearColor(blackColor.x, blackColor.y, blackColor.z, blackColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     complete = 1;
-    vertex = surfaceRevolution(sample);
-    controlPoints.clear();
-    sample.clear();
   }
 }
 
@@ -186,8 +184,30 @@ void computeBezier()
   }
 }
 
+void surfaceRevolution(mat4 mvp)
+{
+  mat4 mv = mat4(mvp);
+  for (int i = 0; i < 360; i += 5)
+  {
+    mv = glm::rotate(mv, (float)i, vec3(0,1,0));
+    for (int j = 0; j < SLICES + 1; j++)
+    {
+      float xp = mv[0].x * sample[j].x + mv[0].y * sample[j].y + mv[0].z * sample[j].z + mv[0].w;
+      float yp = mv[1].x * sample[j].x + mv[1].y * sample[j].y + mv[1].z * sample[j].z + mv[1].w;
+      float zp = mv[2].x * sample[j].x + mv[2].y * sample[j].y + mv[2].z * sample[j].z + mv[2].w;
+      float wp = mv[3].x * sample[j].x + mv[3].y * sample[j].y + mv[3].z * sample[j].z + mv[3].w;
+      wp *= wp;
 
-vector<Vertex> surfaceRevolution( const vector<vec3>& pts, unsigned int segments )
+      xp /= wp;
+      yp /= wp;
+      zp /= wp;
+
+      vertex.push_back(vec3(xp,yp,zp));
+    }
+  }
+}
+
+void surfaceRevolution( const vector<vec3>& pts, unsigned int segments )
 {
   vector<vec2> circlePts;
   for( unsigned int i = 0; i <= segments; ++i )
@@ -206,8 +226,6 @@ vector<Vertex> surfaceRevolution( const vector<vec3>& pts, unsigned int segments
         layers[i][j] = vec3( circlePts[j] * pts[i].x, pts[i].y );
     }
   }
-
-  vector<Vertex> verts;
   for( size_t i = 1; i < layers.size(); ++i )
   {
     const Layer& prvLayer = layers[ i-1 ];
@@ -218,21 +236,41 @@ vector<Vertex> surfaceRevolution( const vector<vec3>& pts, unsigned int segments
       const vec3& LR = prvLayer[ j-0 ];
       const vec3& UL = curLayer[ j-1 ];
       const vec3& UR = curLayer[ j-0 ];
-      cout << LL.z << endl;
 
       const vec3 normal0 = normalize( cross( UR - LL, UL - LL ) );
-      verts.push_back( Vertex( LL, normal0 ) );
-      verts.push_back( Vertex( UR, normal0 ) );
-      verts.push_back( Vertex( UL, normal0 ) );
 
       const vec3 normal1 = normalize( cross( LR - LL, UL - LL ) );
-      verts.push_back( Vertex( LL, normal1 ) );
-      verts.push_back( Vertex( LR, normal1 ) );
-      verts.push_back( Vertex( UR, normal1 ) );
+
+      vertex.push_back( LL );
+      vertex.push_back( UR );
+      vertex.push_back( UL );
+      normals.push_back(normal0);
+      normals.push_back(normal0);
+      normals.push_back(normal0);
+
+      vertex.push_back( LL );
+      vertex.push_back( LR );
+      vertex.push_back( UR );
+      normals.push_back(normal1);
+      normals.push_back(normal1);
+      normals.push_back(normal1);
+
+      uvs.push_back(calcUV(UL));
+      uvs.push_back(calcUV(UR));
+      uvs.push_back(calcUV(LL));
+      uvs.push_back(calcUV(LR));
     }
   }
+}
 
-  return verts;
+vec2 calcUV(vec3 point)
+{
+    point = glm::normalize(point);
+
+    float u = ((glm::atan(point.x, point.z) / M_PI) + 1.0f) * 0.5f;
+    float v = (asin(point.y) / M_PI) + 0.5f;
+
+    return glm::vec2(u, v);
 }
 
 void draw(GLuint arrayAtribSize,
@@ -272,12 +310,14 @@ void drawSurface(GLuint buffer,
           GLuint colorUniform,
           GLuint shader,
           vec3 color,
-          vector<Vertex> data,
+          vector<vec3> data,
+          vector<vec3> normal,
+          vector<vec2> uv,
           GLuint arrayAtribSize,
           GLuint drawType)
 {
   glBindBuffer(GL_ARRAY_BUFFER, buffer);
-  glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(Vertex), &data[0], GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(vec3), &data[0], GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glUseProgram(shader);
 

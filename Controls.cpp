@@ -2,9 +2,10 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+extern GLFWwindow* window;
 using namespace glm;
 
-#include "controls.hpp"
+#include "include/Controls.h"
 
 glm::mat4 ViewMatrix;
 glm::mat4 ProjectionMatrix;
@@ -31,7 +32,8 @@ float mouseSpeed = 0.005f;
 
 
 
-void computeMatricesFromInputs(){
+void computeMatricesFromInputs()
+{
 
 	// glfwGetTime is called only once, the first time this function is called
 	static double lastTime = glfwGetTime();
@@ -45,11 +47,11 @@ void computeMatricesFromInputs(){
 	glfwGetCursorPos(window, &xpos, &ypos);
 
 	// Reset mouse position for next frame
-	glfwSetCursorPos(window, 1024/2, 768/2);
+	glfwSetCursorPos(window, WIDTH/2, HEIGHT/2);
 
 	// Compute new orientation
-	horizontalAngle += mouseSpeed * float(1024/2 - xpos );
-	verticalAngle   += mouseSpeed * float( 768/2 - ypos );
+	horizontalAngle += mouseSpeed * float(WIDTH/2 - xpos );
+	verticalAngle   += mouseSpeed * float( HEIGHT/2 - ypos );
 
 	// Direction : Spherical coordinates to Cartesian coordinates conversion
 	glm::vec3 direction(
