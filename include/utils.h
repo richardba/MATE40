@@ -49,15 +49,6 @@ extern void draw(GLuint, GLuint, GLuint, GLuint, GLuint, vec3, vector<vec3>);
 extern void drawBezier();
 extern void drawCircle(int, double, double, double);
 extern void drawLine(vec3, vec3);
-extern void drawSurface(GLuint buffer,
-                        GLuint colorUniform,
-                        GLuint shader,
-                        vec3 color,
-                        vector<vec3> data,
-                        vector<vec3> normal,
-                        vector<vec2> uv,
-                        GLuint arrayAtribSize=GL_TYPE_3D,
-                        GLuint drawType=GL_TRIANGLES);
 extern void glfwDrawCurve(GLuint,GLuint);
 extern void initGLFW();
 extern void initShaders(GLuint*, GLuint[]);

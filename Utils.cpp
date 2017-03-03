@@ -244,7 +244,6 @@ vec2 calcUV(vec3 point)
     point = glm::normalize(point);
 
     float u = ((glm::atan(point.x, point.z) / M_PI) + 1.0f) * 0.5f;
-    cout << u << endl;
     float v = (asin(point.y) / M_PI) + 0.5f;
 
     return glm::vec2(u, v);
@@ -283,39 +282,5 @@ void draw(GLuint arrayAtribSize,
 
 }
 
-void drawSurface(GLuint buffer,
-          GLuint colorUniform,
-          GLuint shader,
-          vec3 color,
-          vector<vec3> data,
-          vector<vec3> normal,
-          vector<vec2> uv,
-          GLuint arrayAtribSize,
-          GLuint drawType)
-{
-  glBindBuffer(GL_ARRAY_BUFFER, buffer);
-  glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(vec3), &data[0], GL_DYNAMIC_DRAW);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glUseProgram(shader);
-
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glUniform3f(colorUniform, color.x, color.y, color.z);
-  glEnableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, buffer);
-  glVertexAttribPointer(
-    0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-    arrayAtribSize,                  // size
-    GL_FLOAT,           // type
-    GL_FALSE,           // normalized?
-    0,                  // stride
-    (void*)0            // array buffer offset
-  );
-
-  glDrawArrays(drawType, 0, data.size());
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glDisableVertexAttribArray(0);
-  glUseProgram(0);
-
-}
 
 

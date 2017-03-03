@@ -56,11 +56,10 @@ int main( void )
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-  // Open a window and create its OpenGL context
 	window = glfwCreateWindow( WIDTH, HEIGHT, "Surface of Revolution", NULL, NULL);
 	if( window == NULL ){
 		cout << "Erro ao inicializar o GLFW!" << endl;
@@ -72,8 +71,7 @@ int main( void )
   glfwSetKeyCallback(window, keyCallback);
   glfwSetCursorPosCallback(window, positionCallback);
 
-	// Initialize GLEW
-	glewExperimental = true; // Needed for core profile
+	glewExperimental = true;
 	if (glewInit() != GLEW_OK)
   {
 		cout << "Erro ao inicializar o GLEW!" << endl;
@@ -82,10 +80,8 @@ int main( void )
 		return EXIT_FAILURE;
 	}
 
-	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-	// Dark blue background
 	glClearColor(blackColor.x, blackColor.y, blackColor.z, blackColor.w);
 
 	GLuint VertexArrayID;
@@ -153,12 +149,12 @@ int main( void )
       mat4 ViewMatrix = getViewMatrix();
       mat4 ModelMatrix = glm::mat4(1.0);
       mat4 ModelViewMatrix = ViewMatrix * ModelMatrix;
-      mat3 ModelView3x3Matrix = glm::mat3(ModelViewMatrix);
 
       mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
       glUseProgram(shaders[1]);
       if(vertex.empty())
       {
+
         surfaceRevolution(sample);
         glGenBuffers(1, &surfaceBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, surfaceBuffer);
@@ -178,11 +174,11 @@ int main( void )
         glBindBuffer(GL_ARRAY_BUFFER, 0);
       }
 
-      glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-      glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
-      glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
-      glm::vec3 lightPos = glm::vec3(2,1,2);
+      glm::vec3 lightPos = glm::vec3(3,3,3);
       glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
       glActiveTexture(GL_TEXTURE0);
@@ -191,27 +187,27 @@ int main( void )
       glEnableVertexAttribArray(0);
       glBindBuffer(GL_ARRAY_BUFFER, surfaceBuffer);
       glVertexAttribPointer(
-        0,                  // attribute
-        3,                  // size
-        GL_FLOAT,           // type
-        GL_FALSE,           // normalized?
-        0,                  // stride
-        (void*)0            // array buffer offset
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        0,
+        (void*)0
       );
 
-      // 2nd attribute buffer : UVs
+
       glEnableVertexAttribArray(1);
       glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
       glVertexAttribPointer(
-        1,                                // attribute
-        2,                                // size
-        GL_FLOAT,                         // type
-        GL_FALSE,                         // normalized?
-        0,                                // stride
-        (void*)0                          // array buffer offset
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        0,
+        (void*)0
       );
 
-      // 3rd attribute buffer : normals
+
       glEnableVertexAttribArray(2);
       glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
       glVertexAttribPointer(
