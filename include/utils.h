@@ -15,7 +15,7 @@
 //#define M_PI acos(-1.0)
 #define THE_NUMBER 9e20f
 #define USE_GLFW 0
-#define SLICES 30.0f
+#define SLICES 32.0f
 #define M_DIST 0.00015f
 #define GL_TYPE_3D 3
 

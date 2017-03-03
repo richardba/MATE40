@@ -39,12 +39,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="Main.cpp" />
-		<Unit filename="Mesh.cpp" />
 		<Unit filename="Shader.cpp" />
 		<Unit filename="Texture.cpp" />
 		<Unit filename="Utils.cpp" />
 		<Unit filename="include/Controls.h" />
-		<Unit filename="include/Mesh.h" />
 		<Unit filename="include/Shader.h" />
 		<Unit filename="include/Texture.h" />
 		<Unit filename="include/Utils.h" />

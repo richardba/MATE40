@@ -182,7 +182,7 @@ int main( void )
       glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
       glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
-      glm::vec3 lightPos = glm::vec3(4,4,4);
+      glm::vec3 lightPos = glm::vec3(2,1,2);
       glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
       glActiveTexture(GL_TEXTURE0);

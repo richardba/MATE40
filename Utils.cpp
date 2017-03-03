@@ -133,9 +133,9 @@ void mouseCallback(GLFWwindow* win, int button, int action, int mods)
   {
     computeBezier();
   }
-  if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+  if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS && !sample.empty())
   {
-    glClearColor(blackColor.x, blackColor.y, blackColor.z, blackColor.w);
+    glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     complete = 1;
   }
@@ -184,138 +184,38 @@ void computeBezier()
   }
 }
 
-void surfaceRevolution(mat4 mvp)
+void surfaceRevolution( const vector<vec3>& pts, unsigned int segments )
 {
-  mat4 mv = mat4(mvp);
-  for (int i = 0; i < 360; i += 5)
+  int i,j;
+  vector<vec3> tmp;
+  for(j = 0; j < pts.size();++j)
   {
-    mv = glm::rotate(mv, (float)i, vec3(0,1,0));
-    for (int j = 0; j < SLICES + 1; j++)
-    {
-      float xp = 10+(mv[0].x * sample[j].x + mv[0].y * sample[j].y + mv[0].z * sample[j].z + mv[0].w);
-      float yp = (mv[1].x * sample[j].x + mv[1].y * sample[j].y + mv[1].z * sample[j].z + mv[1].w);
-      float zp = 10+(mv[2].x * sample[j].x + mv[2].y * sample[j].y + mv[2].z * sample[j].z + mv[2].w);
-      float wp = mv[3].x * sample[j].x + mv[3].y * sample[j].y + mv[3].z * sample[j].z + mv[3].w;
-      wp *= wp;
-
-      xp /= wp;
-      yp /= wp;
-      zp /= wp;
-
-      vertex.push_back(vec3(xp,yp,zp));
-    }
-  }
-  int i;
-  if(unordered_points)
-  {
-    for (i = 0; i < vertex.size() - slices - 1; i++)
-    {
-      if ((i + 1) % ((int)slices + 1) != 0)
+      for(i =0; i < segments;++i)
       {
-        const unsigned short UL_index = i,
-                             UR_index = i+1,
-                             LL_index = i+slices+1,
-                             LR_index = i+slices+2;
-        const vec3 UL = vec3(vertex[UL_index][0], vertex[UL_index][1], vertex[UL_index][2]);
-        const vec3 UR = vec3(vertex[UR_index][0], vertex[UR_index][1], vertex[UR_index][2]);
-        const vec3 LL = vec3(vertex[LL_index][0], vertex[LL_index][1], vertex[LL_index][2]);
-        const vec3 LR = vec3(vertex[LR_index][0], vertex[LR_index][1], vertex[LR_index][2]);
-        cout << UL.z << endl;
-        const vec3 normal0 = normalize(cross(UR - LL, UL - LL));
-        const vec3 normal1 = normalize(cross(LR - LL, UL - LL));
+          const vec2 p = pts[j];
+          double theta = ((double)(M_PI*2.0)*((double)i))/(double)segments;
+          double x = sin(theta)*p.x;
+          double z = cos(theta)*p.x;
 
-        indices.push_back( LL_index );
-        indices.push_back( UR_index );
-        indices.push_back( UL_index );
-        normals.push_back(normal0);
-        normals.push_back(normal0);
-        normals.push_back(normal0);
-
-        indices.push_back( LL_index );
-        indices.push_back( LR_index );
-        indices.push_back( UR_index );
-        normals.push_back(normal1);
-        normals.push_back(normal1);
-        normals.push_back(normal1);
-
-        uvs.push_back(calcUV(UL));
-        uvs.push_back(calcUV(UR));
-        uvs.push_back(calcUV(LL));
-        uvs.push_back(calcUV(LR));
+          tmp.push_back(vec3(x,p.y,z));
       }
-    }
+  }
 
-    for (; i < vertex.size() - 1; i++)
+  for(i=0; i < tmp.size()-segments-1; i++)
+  {
+    if ((i + 1) % ((int)segments + 1) != 0)
     {
       const unsigned short UL_index = i,
-                           UR_index = i+1,
-                           LL_index = i+slices+1 - vertex.size(),
-                           LR_index = i+slices+2 - vertex.size();
-      const vec3 UL = vec3(vertex[UL_index][0], vertex[UL_index][1], vertex[UL_index][2]);
-      const vec3 UR = vec3(vertex[UR_index][0], vertex[UR_index][1], vertex[UR_index][2]);
-      const vec3 LL = vec3(vertex[LL_index][0], vertex[LL_index][1], vertex[LL_index][2]);
-      const vec3 LR = vec3(vertex[LR_index][0], vertex[LR_index][1], vertex[LR_index][2]);
+                         UR_index = i+1,
+                         LL_index = i+segments,
+                         LR_index = i+segments+1;
+      const vec3 UL = tmp[UL_index];
+      const vec3 UR = tmp[UR_index];
+      const vec3 LL = tmp[LL_index];
+      const vec3 LR = tmp[LR_index];
 
       const vec3 normal0 = normalize(cross(UR - LL, UL - LL));
       const vec3 normal1 = normalize(cross(LR - LL, UL - LL));
-
-        indices.push_back( LL_index );
-        indices.push_back( UR_index );
-        indices.push_back( UL_index );
-        normals.push_back(normal0);
-        normals.push_back(normal0);
-        normals.push_back(normal0);
-
-        indices.push_back( LL_index );
-        indices.push_back( LR_index );
-        indices.push_back( UR_index );
-        normals.push_back(normal1);
-        normals.push_back(normal1);
-        normals.push_back(normal1);
-
-        uvs.push_back(calcUV(UL));
-        uvs.push_back(calcUV(UR));
-        uvs.push_back(calcUV(LL));
-        uvs.push_back(calcUV(LR));
-
-    }
-    unordered_points=0;
-  }
-}
-
-void surfaceRevolution( const vector<vec3>& pts, unsigned int segments )
-{
-  vector<vec2> circlePts;
-  for( unsigned int i = 0; i <= segments; ++i )
-  {
-    float angle = (i / (float)segments) * M_PI * 2.0f;
-    circlePts.push_back( vec2( cos( angle ), sin( angle ) ) );
-  }
-
-  typedef vector<vec3> Layer;
-  typedef vector<Layer> Layers;
-  Layers layers( pts.size(), Layer( circlePts.size() ) );
-  for( size_t i = 0; i < pts.size(); ++i )
-  {
-    for( unsigned int j = 0; j < circlePts.size(); ++j )
-    {
-        layers[i][j] = vec3( circlePts[j] * pts[i].x, pts[i].y );
-    }
-  }
-  for( size_t i = 1; i < layers.size(); ++i )
-  {
-    const Layer& prvLayer = layers[ i-1 ];
-    const Layer& curLayer = layers[ i-0 ];
-    for( size_t j = 1; j < circlePts.size(); ++j )
-    {
-      const vec3& LL = prvLayer[ j-1 ];
-      const vec3& LR = prvLayer[ j-0 ];
-      const vec3& UL = curLayer[ j-1 ];
-      const vec3& UR = curLayer[ j-0 ];
-
-      const vec3 normal0 = normalize( cross( UR - LL, UL - LL ) );
-
-      const vec3 normal1 = normalize( cross( LR - LL, UL - LL ) );
 
       vertex.push_back( LL );
       vertex.push_back( UR );
@@ -330,13 +230,13 @@ void surfaceRevolution( const vector<vec3>& pts, unsigned int segments )
       normals.push_back(normal1);
       normals.push_back(normal1);
       normals.push_back(normal1);
-
       uvs.push_back(calcUV(UL));
       uvs.push_back(calcUV(UR));
       uvs.push_back(calcUV(LL));
       uvs.push_back(calcUV(LR));
     }
   }
+
 }
 
 vec2 calcUV(vec3 point)
@@ -344,6 +244,7 @@ vec2 calcUV(vec3 point)
     point = glm::normalize(point);
 
     float u = ((glm::atan(point.x, point.z) / M_PI) + 1.0f) * 0.5f;
+    cout << u << endl;
     float v = (asin(point.y) / M_PI) + 0.5f;
 
     return glm::vec2(u, v);
