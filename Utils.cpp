@@ -190,9 +190,9 @@ void surfaceRevolution( const vector<vec3>& pts, unsigned int segments )
   vector<vec3> tmp;
   for(j = 0; j < pts.size();++j)
   {
+      const vec2 p = vec2(pts[j].x, pts[j].y);
       for(i =0; i < segments;++i)
       {
-          const vec2 p = pts[j];
           double theta = ((double)(M_PI*2.0)*((double)i))/(double)segments;
           double x = sin(theta)*p.x;
           double z = cos(theta)*p.x;
@@ -236,7 +236,40 @@ void surfaceRevolution( const vector<vec3>& pts, unsigned int segments )
       uvs.push_back(calcUV(LR));
     }
   }
-
+  cout << tmp.size();
+  for (; i < tmp.size() - 1; i++)
+  {
+    const unsigned short UL_index = i-1,
+                         UR_index = i,
+                         LL_index = i+segments - tmp.size(),
+                         LR_index = i+segments - tmp.size();
+//    const vec3 UL = tmp[UL_index];
+//    const vec3 UR = tmp[UR_index];
+//    const vec3 LL = tmp[LL_index];
+//    const vec3 LR = tmp[LR_index];
+//
+//    const vec3 normal0 = normalize(cross(UR - LL, UL - LL));
+//    const vec3 normal1 = normalize(cross(LR - LL, UL - LL));
+//
+//    vertex.push_back( LL );
+//    vertex.push_back( UR );
+//    vertex.push_back( UL );
+//    normals.push_back(normal0);
+//    normals.push_back(normal0);
+//    normals.push_back(normal0);
+//
+//    vertex.push_back( LL );
+//    vertex.push_back( LR );
+//    vertex.push_back( UR );
+//    normals.push_back(normal1);
+//    normals.push_back(normal1);
+//    normals.push_back(normal1);
+//    uvs.push_back(calcUV(UL));
+//    uvs.push_back(calcUV(UR));
+//    uvs.push_back(calcUV(LL));
+//    uvs.push_back(calcUV(LR));
+  }
+  tmp.clear();
 }
 
 vec2 calcUV(vec3 point)

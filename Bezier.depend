@@ -24,7 +24,7 @@
 	"include/utils.h"
 	<iostream>
 
-1488565369 source:c:\users\richardba\workspace\mate40\main.cpp
+1488586874 source:c:\users\richardba\workspace\mate40\main.cpp
 	<GL/glew.h>
 	<GL/glut.h>
 	<fstream>
@@ -167,7 +167,7 @@
 
 1487952718 c:\users\richardba\workspace\mate40\include\shader.h
 
-1488555507 source:c:\users\richardba\workspace\mate40\utils.cpp
+1488588722 source:c:\users\richardba\workspace\mate40\utils.cpp
 	"include/Utils.h"
 	<iostream>
 	<vector>

@@ -91,7 +91,9 @@ int main( void )
 	GLuint shaders[] = {LoadShaders( "2d.vert", "2d.frag" ), LoadShaders( "3d.vert", "3d.frag" )};
   GLuint pointsBuffer,
          lineBuffer,
-         surfaceBuffer;
+         surfaceBuffer,
+         uvBuffer,
+         normalBuffer;
   glGenBuffers(1, &pointsBuffer);
   glBindBuffer(GL_ARRAY_BUFFER, pointsBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vec3), &controlPoints[0], GL_DYNAMIC_DRAW);
@@ -100,23 +102,6 @@ int main( void )
   glGenBuffers(1, &lineBuffer);
   glBindBuffer(GL_ARRAY_BUFFER, lineBuffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vec3), &sample[0], GL_DYNAMIC_DRAW);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  glGenBuffers(1, &surfaceBuffer);
-  glBindBuffer(GL_ARRAY_BUFFER, surfaceBuffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vec3), &vertex[0], GL_DYNAMIC_DRAW);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	GLuint uvBuffer;
-	glGenBuffers(1, &uvBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vec2), &uvs[0], GL_STATIC_DRAW);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	GLuint normalBuffer;
-	glGenBuffers(1, &normalBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vec3), &normals[0], GL_STATIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   GLuint color         = glGetUniformLocation(shaders[0], "elementColor");
@@ -145,87 +130,88 @@ int main( void )
     } else if(complete)
     {
       computeMatricesFromInputs();
-      mat4 ProjectionMatrix = getProjectionMatrix();
-      mat4 ViewMatrix = getViewMatrix();
-      mat4 ModelMatrix = glm::mat4(1.0);
-      mat4 ModelViewMatrix = ViewMatrix * ModelMatrix;
-
-      mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
       glUseProgram(shaders[1]);
       if(vertex.empty())
       {
+//        glEnable(GL_DEPTH_TEST);
+//        glDepthFunc(GL_LESS);
+
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_CW);
 
         surfaceRevolution(sample);
+        glGenBuffers(1, &surfaceBuffer);
         glGenBuffers(1, &surfaceBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, surfaceBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vec3)*vertex.size(), &vertex[0], GL_DYNAMIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        GLuint uvBuffer;
         glGenBuffers(1, &uvBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vec2)*uvs.size(), &uvs[0], GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        GLuint normalBuffer;
         glGenBuffers(1, &normalBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vec3)*normals.size(), &normals[0], GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
       }
+    mat4 ProjectionMatrix = getProjectionMatrix();
+    mat4 ViewMatrix = getViewMatrix();
+    mat4 ModelMatrix = glm::mat4(1.0);
+    mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
-		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+    glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
-      glm::vec3 lightPos = glm::vec3(3,3,3);
-      glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
+    glm::vec3 lightPos = glm::vec3(3,3,3);
+    glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, Texture);
-      glUniform1i(TextureID, 0);
-      glEnableVertexAttribArray(0);
-      glBindBuffer(GL_ARRAY_BUFFER, surfaceBuffer);
-      glVertexAttribPointer(
-        0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        0,
-        (void*)0
-      );
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, Texture);
+    glUniform1i(TextureID, 0);
 
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, surfaceBuffer);
+    glVertexAttribPointer(
+      0,
+      3,
+      GL_FLOAT,
+      GL_FALSE,
+      0,
+      (void*)0
+    );
 
-      glEnableVertexAttribArray(1);
-      glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-      glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        0,
-        (void*)0
-      );
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
+    glVertexAttribPointer(
+      1,
+      2,
+      GL_FLOAT,
+      GL_FALSE,
+      0,
+      (void*)0
+    );
 
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+    glVertexAttribPointer(
+      2,                                // attribute
+      3,                                // size
+      GL_FLOAT,                         // type
+      GL_FALSE,                         // normalized?
+      0,                                // stride
+      (void*)0                          // array buffer offset
+    );
 
-      glEnableVertexAttribArray(2);
-      glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
-      glVertexAttribPointer(
-        2,                                // attribute
-        3,                                // size
-        GL_FLOAT,                         // type
-        GL_FALSE,                         // normalized?
-        0,                                // stride
-        (void*)0                          // array buffer offset
-      );
+    // Draw the triangles !
+    glDrawArrays(GL_TRIANGLES, 0, vertex.size() );
 
-      // Draw the triangles !
-      glDrawArrays(GL_TRIANGLES, 0, vertex.size() );
-
-      glDisableVertexAttribArray(0);
-      glDisableVertexAttribArray(1);
-      glDisableVertexAttribArray(2);
-      glUseProgram(shaders[0]);
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
+    glUseProgram(shaders[0]);
     }
 
 
