@@ -89,14 +89,27 @@ int main( void )
 	glBindVertexArray(VertexArrayID);
 
 	GLuint shaders[] = {LoadShaders( "2d.vert", "2d.frag" ), LoadShaders( "3d.vert", "3d.frag" )};
-  GLuint pointsBuffer,
+  GLuint axisXBuffer,
+         axisYBuffer,
+         pointsBuffer,
          lineBuffer,
          surfaceBuffer,
          uvBuffer,
          normalBuffer;
+
+  glGenBuffers(1, &axisXBuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, axisXBuffer);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vec3)*2, &returnXAxis()[0], GL_DYNAMIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  glGenBuffers(1, &axisYBuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, axisYBuffer);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vec3)*2, &returnYAxis()[0], GL_DYNAMIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
   glGenBuffers(1, &pointsBuffer);
   glBindBuffer(GL_ARRAY_BUFFER, pointsBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vec3), &controlPoints[0], GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vec3), &controlPoints[0], GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   glGenBuffers(1, &lineBuffer);
@@ -105,6 +118,7 @@ int main( void )
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   GLuint color         = glGetUniformLocation(shaders[0], "elementColor");
+  GLuint bulletOrLine  = glGetUniformLocation(shaders[0], "bulletOrLine");
   GLuint MatrixID      = glGetUniformLocation(shaders[1], "MVP");
   GLuint ViewMatrixID  = glGetUniformLocation(shaders[1], "V");
   GLuint ModelMatrixID = glGetUniformLocation(shaders[1], "M");
@@ -113,20 +127,25 @@ int main( void )
 
   GLuint Texture = loadDDS("texture.dds");
 
-
 	do
   {
     glClear( GL_COLOR_BUFFER_BIT );
+    if(!complete)
+    {
+
+      drawAxis(GL_TYPE_3D, axisXBuffer, GL_LINE_STRIP, 2, shaders[0], color, vec3(0.4,0,0));
+      drawAxis(GL_TYPE_3D, axisYBuffer, GL_LINE_STRIP, 2, shaders[0], color, vec3(0,0.4,0));
+    }
     if(!complete && controlPoints.size())
     {
       glEnable(GL_POINT_SMOOTH);
       glEnable(GL_PROGRAM_POINT_SIZE);
       glPointSize(7);
-      draw(GL_TYPE_3D, pointsBuffer, color, GL_POINTS, shaders[0], currentColor, controlPoints);
+      draw(GL_TYPE_3D, pointsBuffer, color, GL_POINTS, bulletOrLine, 1, shaders[0], currentColor, controlPoints);
       glDisable(GL_POINT_SMOOTH);
       glDisable(GL_PROGRAM_POINT_SIZE);
 
-      draw(GL_TYPE_3D, lineBuffer, color, GL_LINE_STRIP, shaders[0], vec3(1), sample);
+      draw(GL_TYPE_3D, lineBuffer, color, GL_LINE_STRIP, bulletOrLine, 0, shaders[0], vec3(1), sample);
     } else if(complete)
     {
       computeMatricesFromInputs();

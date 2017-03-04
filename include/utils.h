@@ -41,11 +41,14 @@ extern GLFWwindow* window;
 extern vector<vec2> uvs;
 extern vector<unsigned short> indices;
 
+extern const vector<vec3> returnXAxis();
+extern const vector<vec3> returnYAxis();
+void drawAxis(GLuint, GLuint, GLuint, GLuint, GLuint, GLuint, vec3);
 extern vec3 calcCasteljau(double, vector<vec3>);
-extern void surfaceRevolution( const vector<vec3>& pts, unsigned int segments = 32);
+extern void surfaceRevolution( const vector<vec3>& pts, unsigned int segments = 64);
 extern void boundingLimits(double[],vec3);
 extern void computeBezier();
-extern void draw(GLuint, GLuint, GLuint, GLuint, GLuint, vec3, vector<vec3>);
+extern void draw(GLuint, GLuint, GLuint, GLuint, GLuint, GLuint, GLuint, vec3, vector<vec3>);
 extern void drawBezier();
 extern void drawCircle(int, double, double, double);
 extern void drawLine(vec3, vec3);

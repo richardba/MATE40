@@ -236,13 +236,12 @@ void surfaceRevolution( const vector<vec3>& pts, unsigned int segments )
       uvs.push_back(calcUV(LR));
     }
   }
-  cout << tmp.size();
-  for (; i < tmp.size() - 1; i++)
-  {
-    const unsigned short UL_index = i-1,
-                         UR_index = i,
-                         LL_index = i+segments - tmp.size(),
-                         LR_index = i+segments - tmp.size();
+//  for (; i < tmp.size() - 1; i++)
+//  {
+//    const unsigned short UL_index = i-1,
+//                         UR_index = i,
+//                         LL_index = i+segments - tmp.size(),
+//                         LR_index = i+segments - tmp.size();
 //    const vec3 UL = tmp[UL_index];
 //    const vec3 UR = tmp[UR_index];
 //    const vec3 LL = tmp[LL_index];
@@ -268,7 +267,7 @@ void surfaceRevolution( const vector<vec3>& pts, unsigned int segments )
 //    uvs.push_back(calcUV(UR));
 //    uvs.push_back(calcUV(LL));
 //    uvs.push_back(calcUV(LR));
-  }
+//  }
   tmp.clear();
 }
 
@@ -286,6 +285,8 @@ void draw(GLuint arrayAtribSize,
           GLuint buffer,
           GLuint colorUniform,
           GLuint drawType,
+          GLuint bulletUniform,
+          GLuint lineFlag,
           GLuint shader,
           vec3 color,
           vector<vec3> data)
@@ -296,6 +297,7 @@ void draw(GLuint arrayAtribSize,
   glUseProgram(shader);
 
   glEnableClientState(GL_VERTEX_ARRAY);
+  glUniform1f(bulletUniform, lineFlag);
   glUniform3f(colorUniform, color.x, color.y, color.z);
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, buffer);
@@ -315,5 +317,48 @@ void draw(GLuint arrayAtribSize,
 
 }
 
+const vector<vec3> returnXAxis()
+{
+  vector<vec3> tmp;
+  tmp.push_back(vec3(-1,0,0));
+  tmp.push_back(vec3(1,0,0));
+  return tmp;
+}
 
+const vector<vec3> returnYAxis()
+{
+  vector<vec3> tmp;
+  tmp.push_back(vec3(0,-1,0));
+  tmp.push_back(vec3(0,1,0));
+  return tmp;
+}
+
+void drawAxis(GLuint arrayAtribSize,
+              GLuint buffer,
+              GLuint drawType,
+              GLuint elementSize,
+              GLuint shader,
+              GLuint colorUniform,
+              vec3 color)
+{
+  glUseProgram(shader);
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glUniform3f(colorUniform, color.x, color.y, color.z);
+  glEnableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer);
+  glVertexAttribPointer(
+    0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+    arrayAtribSize,                  // size
+    GL_FLOAT,           // type
+    GL_FALSE,           // normalized?
+    0,                  // stride
+    (void*)0            // array buffer offset
+  );
+
+  glDrawArrays(drawType, 0, elementSize);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glDisableVertexAttribArray(0);
+  glUseProgram(0);
+}
 
