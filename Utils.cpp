@@ -203,39 +203,38 @@ void surfaceRevolution( const vector<vec3>& pts, unsigned int segments )
 
   for(i=0; i < tmp.size()-segments-1; i++)
   {
-    if ((i + 1) % ((int)segments + 1) != 0)
-    {
-      const unsigned short UL_index = i,
-                         UR_index = i+1,
-                         LL_index = i+segments,
-                         LR_index = i+segments+1;
-      const vec3 UL = tmp[UL_index];
-      const vec3 UR = tmp[UR_index];
-      const vec3 LL = tmp[LL_index];
-      const vec3 LR = tmp[LR_index];
+    const unsigned short UL_index = i,
+                       UR_index = i+1,
+                       LL_index = i+segments,
+                       LR_index = i+segments+1;
+    const vec3 UL = tmp[UL_index];
+    const vec3 UR = tmp[UR_index];
+    const vec3 LL = tmp[LL_index];
+    const vec3 LR = tmp[LR_index];
 
-      const vec3 normal0 = normalize(cross(UR - LL, UL - LL));
-      const vec3 normal1 = normalize(cross(LR - LL, UL - LL));
+    const vec3 normal0 = normalize(cross(UR - LL, UL - LL));
+    const vec3 normal1 = normalize(cross(LR - LL, UL - LL));
 
-      vertex.push_back( LL );
-      vertex.push_back( UR );
-      vertex.push_back( UL );
-      normals.push_back(normal0);
-      normals.push_back(normal0);
-      normals.push_back(normal0);
+    vertex.push_back( LL );
+    vertex.push_back( UR );
+    vertex.push_back( UL );
+    normals.push_back(normal0);
+    normals.push_back(normal0);
+    normals.push_back(normal0);
 
-      vertex.push_back( LL );
-      vertex.push_back( LR );
-      vertex.push_back( UR );
-      normals.push_back(normal1);
-      normals.push_back(normal1);
-      normals.push_back(normal1);
-      uvs.push_back(calcUV(UL));
-      uvs.push_back(calcUV(UR));
-      uvs.push_back(calcUV(LL));
-      uvs.push_back(calcUV(LR));
-    }
+    vertex.push_back( LL );
+    vertex.push_back( LR );
+    vertex.push_back( UR );
+    normals.push_back(normal1);
+    normals.push_back(normal1);
+    normals.push_back(normal1);
+    uvs.push_back(calcUV(UL));
+    uvs.push_back(calcUV(UR));
+    uvs.push_back(calcUV(LL));
+    uvs.push_back(calcUV(LR));
   }
+
+
 //  for (; i < tmp.size() - 1; i++)
 //  {
 //    const unsigned short UL_index = i-1,

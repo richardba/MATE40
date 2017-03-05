@@ -59,6 +59,7 @@ int main( void )
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+  glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
 
 	window = glfwCreateWindow( WIDTH, HEIGHT, "Surface of Revolution", NULL, NULL);
 	if( window == NULL ){
@@ -66,10 +67,14 @@ int main( void )
 		cin >> form;
 		return EXIT_FAILURE;
 	}
+
 	glfwMakeContextCurrent(window);
 	glfwSetMouseButtonCallback(window, mouseCallback);
   glfwSetKeyCallback(window, keyCallback);
   glfwSetCursorPosCallback(window, positionCallback);
+  const GLFWvidmode mode = *glfwGetVideoMode(glfwGetPrimaryMonitor());
+  glfwSetWindowPos(window, (mode.width-WIDTH)/2, (mode.height-HEIGHT)/2);
+  glfwShowWindow(window);
 
 	glewExperimental = true;
 	if (glewInit() != GLEW_OK)
@@ -152,6 +157,7 @@ int main( void )
       glUseProgram(shaders[1]);
       if(vertex.empty())
       {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 //        glEnable(GL_DEPTH_TEST);
 //        glDepthFunc(GL_LESS);
 

@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 extern GLFWwindow* window;
 using namespace glm;
 
@@ -19,11 +20,11 @@ glm::mat4 getProjectionMatrix(){
 
 
 // Initial position : on +Z
-glm::vec3 position = glm::vec3( 0, 0, -1 );
+glm::vec3 position = glm::vec3( 0, 0, -3 );
 // Initial horizontal angle : toward -Z
-float horizontalAngle = 3.14f;
+float horizontalAngle = 6.25f;
 // Initial vertical angle : none
-float verticalAngle = 0.0f;
+float verticalAngle = -5.0f;
 // Initial Field of View
 float initialFoV = 45.0f;
 
@@ -69,10 +70,12 @@ void computeMatricesFromInputs()
 
 	// Up vector
 	glm::vec3 up = glm::cross( right, direction );
-
+  GLuint tmp=0;
 	// Move forward
 	if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS){
 		position += direction * deltaTime * speed;
+    tmp=1;
+
 	}
 	// Move backward
 	if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_PRESS){
@@ -100,4 +103,10 @@ void computeMatricesFromInputs()
 
 	// For the next frame, the "last time" will be "now"
 	lastTime = currentTime;
+	if(tmp)
+  {
+    	std::cout << "initialFoV" << initialFoV << std::endl;
+	std::cout << "horizontalAngle" <<  horizontalAngle << std::endl;
+	std::cout << "verticalAngle" <<  verticalAngle << std::endl;
+  }
 }
