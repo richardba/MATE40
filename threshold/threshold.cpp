@@ -17,7 +17,7 @@ int const max_lowThreshold = 100;
 int ratio = 3;
 int kernel_size = 3;
 
-Mat src, src_gray, dst, detected_edges;
+Mat src, src_gray, dst, edge, detected_edges, tmp;
 const char* window_name = "Artistic Threshold";
 const char* trackbar_type = "Type: \n 0: Binary \n 1: Binary Inverted \n 2: Truncate \n 3: To Zero \n 4: To Zero Inverted";
 const char* trackbar_value = "Value";
@@ -29,7 +29,6 @@ void CannyThreshold(int, void*);
 int main( int, char** argv )
 {
   cvMain( 0, 0);
-  //createTrackbar( "Min Threshold:", window_name, &lowThreshold, max_lowThreshold, CannyThreshold );
   //CannyThreshold( 0, 0 );
   for(;;)
     {
@@ -58,6 +57,7 @@ void Threshold_Demo( int, void* )
 
 void CannyThreshold(int, void*)
 {
+  Threshold_Demo( 0, 0 );
   /// Reduce noise with a kernel 3x3
   blur( src_gray, detected_edges, Size(3,3) );
 
@@ -65,9 +65,14 @@ void CannyThreshold(int, void*)
   Canny( detected_edges, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size );
 
   /// Using Canny's output as a mask, we display our result
-  dst = Scalar::all(0);
+  edge = Scalar::all(0);
 
-  src.copyTo( dst, detected_edges);
+  src.copyTo( edge, detected_edges);
+
+  cvtColor( edge, edge, COLOR_RGB2GRAY );
+
+  dst = dst + edge;
+
   imshow( window_name, dst );
  }
 
@@ -97,9 +102,10 @@ void cvMain(int, void*)
 {
   src = openFile();
   cvtColor( src, src_gray, COLOR_RGB2GRAY );
+  edge.create( src_gray.size(), src_gray.type() );
   namedWindow( window_name, WINDOW_AUTOSIZE );
   createTrackbar( trackbar_type, window_name, &threshold_type, max_type, Threshold_Demo );
   createTrackbar( trackbar_value, window_name, &threshold_value, max_value, Threshold_Demo );
-  //createTrackbar( "Min Threshold:", window_name, &lowThreshold, max_lowThreshold, CannyThreshold );
+  createTrackbar( "Min Threshold:", window_name, &lowThreshold, max_lowThreshold, CannyThreshold );
   Threshold_Demo( 0, 0 );
 }

@@ -7,3 +7,11 @@
 	<stdio.h>
 	<string>
 
+1490981201 source:/home/ricardo/workspace/MATE71/threshold/threshold.cpp
+	"opencv2/imgproc/imgproc.hpp"
+	"opencv2/imgcodecs.hpp"
+	"opencv2/highgui/highgui.hpp"
+	<stdlib.h>
+	<stdio.h>
+	<string>
+
