@@ -4,6 +4,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include <iostream>
+#ifdef _WIN32
+  #include <windows.h>
+  #include <msclr\marshal_cppstd.h>
+  using namespace System;
+  using namespace System::Windows::Forms;
+  using namespace msclr::interop;
+#endif // _WIN32
 
 using namespace cv;
 int threshold_value = 0;
@@ -19,9 +27,9 @@ int kernel_size = 3;
 
 Mat src, src_gray, dst, edge, detected_edges, tmp;
 const char* window_name = "Artistic Threshold";
-const char* trackbar_type = "Type: \n 0: Binary \n 1: Binary Inverted \n 2: Truncate \n 3: To Zero \n 4: To Zero Inverted";
+const char* trackbar_type = "Tipo: \n 0: Binário \n 1: Binário Invertido \n 2: Truncado \n 3: Com zero \n 4: Com zero invertido";
 const char* trackbar_value = "Value";
-void Threshold_Demo( int, void* );
+void artisticThreshold( int, void* );
 Mat openFile();
 void cvMain(int, void*);
 void CannyThreshold(int, void*);
@@ -43,21 +51,16 @@ int main( int, char** argv )
     }
   return 0;
 }
-void Threshold_Demo( int, void* )
+void artisticThreshold( int, void* )
 {
-  /* 0: Binary
-     1: Binary Inverted
-     2: Threshold Truncated
-     3: Threshold to Zero
-     4: Threshold to Zero Inverted
-   */
-  threshold( src_gray, dst, threshold_value, max_BINARY_value,threshold_type );
+
+  threshold( src_gray, dst, threshold_value, max_BINARY_value, threshold_type );
   imshow( window_name, dst );
 }
 
 void CannyThreshold(int, void*)
 {
-  Threshold_Demo( 0, 0 );
+  artisticThreshold( 0, 0 );
   /// Reduce noise with a kernel 3x3
   blur( src_gray, detected_edges, Size(3,3) );
 
@@ -70,8 +73,11 @@ void CannyThreshold(int, void*)
   src.copyTo( edge, detected_edges);
 
   cvtColor( edge, edge, COLOR_RGB2GRAY );
-
-  dst = dst + edge;
+  /*if(threshold_type==0||threshold_type==3)
+  {
+    bitwise_not ( edge, edge );
+  }*/
+    dst = dst + edge;
 
   imshow( window_name, dst );
  }
@@ -79,6 +85,16 @@ void CannyThreshold(int, void*)
 
 Mat openFile()
 {
+  #ifdef _WIN32
+  OpenFileDialog^ openFileDialog1 = gcnew OpenFileDialog;
+
+  openFileDialog1->InitialDirectory = "c:\\";
+  openFileDialog1->Filter = "All files (*.*)|*.*";
+  openFileDialog1->FilterIndex = 1;
+  openFileDialog1->RestoreDirectory = true;
+  std::string fileName = marshal_as<std::string>(openFileDialog1->FileName);
+  return imread(fileName);
+  #else
   FILE *in;
   if (!(in = popen("zenity  --title=\"Select an image\" --file-selection","r")))
   {
@@ -96,6 +112,7 @@ Mat openFile()
 
   selectFile.erase(std::remove(selectFile.begin(), selectFile.end(), '\n'), selectFile.end());
   return imread(selectFile);
+  #endif // _WIN32
 }
 
 void cvMain(int, void*)
@@ -104,8 +121,8 @@ void cvMain(int, void*)
   cvtColor( src, src_gray, COLOR_RGB2GRAY );
   edge.create( src_gray.size(), src_gray.type() );
   namedWindow( window_name, WINDOW_AUTOSIZE );
-  createTrackbar( trackbar_type, window_name, &threshold_type, max_type, Threshold_Demo );
-  createTrackbar( trackbar_value, window_name, &threshold_value, max_value, Threshold_Demo );
+  createTrackbar( trackbar_type, window_name, &threshold_type, max_type, artisticThreshold );
+  createTrackbar( trackbar_value, window_name, &threshold_value, max_value, artisticThreshold );
   createTrackbar( "Min Threshold:", window_name, &lowThreshold, max_lowThreshold, CannyThreshold );
-  Threshold_Demo( 0, 0 );
+  artisticThreshold( 0, 0 );
 }
