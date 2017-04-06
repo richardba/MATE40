@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="threshold" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/threshold" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/threshold" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-static-libgcc -static-libstdc++" />
+		</Compiler>
+		<Linker>
+			<Add library="C:/MinGW/lib/libjpeg.a" />
+			<Add library="C:/MinGW/lib/libpng.a" />
+			<Add library="C:/MinGW/lib/libwin32k.a" />
+			<Add library="C:/MinGW/lib/libz.a" />
+			<Add library="C:/MinGW/lib/libuser32.a" />
+			<Add library="C:/MinGW/lib/libcomdlg32.a" />
+			<Add library="C:/MinGW/lib/libgdi32.a" />
+			<Add library="C:/MinGW/lib/libcomctl32.a" />
+			<Add library="kernel32" />
+			<Add library="C:/MinGW/lib/libopencv_core320.dll.a" />
+			<Add library="C:/MinGW/lib/libopencv_imgcodecs320.dll.a" />
+			<Add library="C:/MinGW/lib/libopencv_imgproc320.dll.a" />
+			<Add library="C:/MinGW/lib/libopencv_highgui320.dll.a" />
+		</Linker>
+		<Unit filename="threshold.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
