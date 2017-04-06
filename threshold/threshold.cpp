@@ -11,29 +11,35 @@
 
 using namespace cv;
 using namespace std;
-int threshold_value = 0;
-int threshold_type = 3;
+
 int const max_value = 255;
 int const max_type = 4;
+int const max_lowThreshold = 100;
 int const max_BINARY_value = 255;
+int const max_blur = 31;
+int const max_blurEdge = 3;
+
+int threshold_value = 0;
+int threshold_type = 3;
+int blurEdge_value = 0;
+int blur_value = 0;
 int edgeThresh = 1;
-int lowThreshold, blur_value=0;
-int const max_lowThreshold = 100, max_blur = 31;
+int lowThreshold;
 int ratio = 3;
 int kernel_size = 3;
 
 Mat src, src_gray, dst, edge, detected_edges, tmp;
-const char* window_name = "Artistic Threshold";
-const char* trackbar = "Trackbars";
-const char* trackbar_type = "Tipo: \n 0: Binário \n 1: Binário Invertido \n 2: Truncado \n 3: Com zero \n 4: Com zero invertido";
-const char* trackbar_value = "Value";
-const char* trackbar_blur = "Gauss Blur";
+const string window_name = "Artistic Threshold";
+const string trackbar = "Trackbars";
+const string trackbar_type = "Tipo: \n 0: Binário \n 1: Binário Invertido \n 2: Truncado \n 3: Com zero \n 4: Com zero invertido";
+const string trackbar_value = "Value";
+const string trackbar_blur = "Blur";
 const string trackbar_edge = "Min Threshold";
+const string trackbar_blurEdge = "Blur on Edge";
 
 void artisticThreshold( int, void* );
 Mat openFile();
 void cvMain(int, void*);
-void detectEdge(int, void*);
 
 int main( int, char** argv )
 {
@@ -54,29 +60,42 @@ int main( int, char** argv )
 void artisticThreshold( int, void* )
 {
   threshold( src_gray, dst, threshold_value, max_BINARY_value, threshold_type );
+
   if(blur_value)
-    for ( int i = 1; i < blur_value; i = i + 2 )
-      GaussianBlur( dst, dst, Size( i, i ), 0, 0 );
+  {
+    if(blur_value%2==0)
+    {
+      blur_value+=1;
+    }
+    medianBlur ( dst, dst, blur_value);
+  }
+
+  if(lowThreshold)
+  {
+    blur( src_gray, detected_edges, Size(3,3) );
+    Canny( detected_edges, detected_edges, lowThreshold+1, lowThreshold*ratio+1, kernel_size );
+    edge = Scalar::all(0);
+
+    src.copyTo( edge, detected_edges);
+    cvtColor( edge, edge, COLOR_RGB2GRAY );
+    if(blurEdge_value)
+    {
+      if(blurEdge_value%2==0)
+      {
+        blurEdge_value+=1;
+      }
+      GaussianBlur( edge, edge, Size( blurEdge_value, blurEdge_value ), 0, 0 );
+    }
+
+    /*if(threshold_type==0||threshold_type==3)
+    {
+      bitwise_not ( edge, edge );
+    }*/
+    dst = dst + edge;
+  }
+
   imshow( window_name, dst );
 }
-
-void detectEdge(int, void*)
-{
-  artisticThreshold( 0, 0 );
-  blur( src_gray, detected_edges, Size(3,3) );
-  Canny( detected_edges, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size );
-  edge = Scalar::all(0);
-
-  src.copyTo( edge, detected_edges);
-  cvtColor( edge, edge, COLOR_RGB2GRAY );
-  /*if(threshold_type==0||threshold_type==3)
-  {
-    bitwise_not ( edge, edge );
-  }*/
-  dst = dst + edge;
-  imshow( window_name, dst );
- }
-
 
 Mat openFile()
 {
@@ -95,6 +114,11 @@ Mat openFile()
     ofn_test.lpstrTitle = tempString.c_str();
     GetOpenFileName(&ofn_test);
     char* filename = ofn_test.lpstrFile;
+    return imread(filename);
+  #elif __APPLE__
+    string filename;
+    cout << "Insira o nome do arquivo" << endl;
+    cin >> filename;
     return imread(filename);
   #else
     FILE *in;
@@ -132,6 +156,8 @@ void cvMain(int, void*)
   createTrackbar( trackbar_type, trackbar, &threshold_type, max_type, artisticThreshold );
   createTrackbar( trackbar_value, trackbar, &threshold_value, max_value, artisticThreshold );
   createTrackbar( trackbar_blur, trackbar, &blur_value, max_blur, artisticThreshold );
-  createTrackbar( trackbar_edge, trackbar, &lowThreshold, max_lowThreshold, detectEdge );
+  createTrackbar( trackbar_edge, trackbar, &lowThreshold, max_lowThreshold, artisticThreshold );
+  createTrackbar( trackbar_blurEdge, trackbar, &blurEdge_value, max_blurEdge, artisticThreshold );
+
   artisticThreshold( 0, 0 );
 }

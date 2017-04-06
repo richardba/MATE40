@@ -7,7 +7,7 @@
 	<stdio.h>
 	<string>
 
-1491329475 source:/home/ricardo/workspace/MATE71/threshold/threshold.cpp
+1491514897 source:/home/ricardo/workspace/MATE71/threshold/threshold.cpp
 	"opencv2/imgproc/imgproc.hpp"
 	"opencv2/imgcodecs.hpp"
 	"opencv2/highgui/highgui.hpp"
@@ -16,5 +16,4 @@
 	<string>
 	<iostream>
 	<windows.h>
-	<msclr\marshal_cppstd.h>
 
