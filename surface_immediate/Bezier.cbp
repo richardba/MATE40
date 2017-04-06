@@ -28,6 +28,13 @@
 				</Linker>
 			</Target>
 		</Build>
+    <Linker>
+			<Add library="freeglut" />
+			<Add library="glew32" />
+			<Add library="glfw3" />
+			<Add library="opengl32" />
+			<Add library="gdi32" />
+		</Linker>
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>

@@ -50,3 +50,29 @@
 	<iostream>
 	<climits>
 
+1491262709 source:c:\users\richardba\workspace\mate71\surface_immediate\main.cpp
+	<GL/glut.h>
+	<fstream>
+	<glm/glm.hpp>
+	<iostream>
+	<math.h>
+	<stdio.h>
+	<stdlib.h>
+	<vector>
+	"include/utils.h"
+	"include/Mesh.h"
+
+1491262709 c:\users\richardba\workspace\mate71\surface_immediate\include\utils.h
+	<vector>
+	<GL/glut.h>
+	<glm/glm.hpp>
+
+1491262709 c:\users\richardba\workspace\mate71\surface_immediate\include\mesh.h
+	<vector>
+
+1491262709 source:c:\users\richardba\workspace\mate71\surface_immediate\mesh.cpp
+	"include/Mesh.h"
+	"include/utils.h"
+	<iostream>
+	<climits>
+

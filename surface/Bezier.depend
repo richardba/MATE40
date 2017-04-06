@@ -191,3 +191,63 @@
 	<GL/glew.h>
 	<GLFW/glfw3.h>
 
+1491262709 source:c:\users\richardba\workspace\mate71\surface\controls.cpp
+	<GLFW/glfw3.h>
+	<glm/glm.hpp>
+	<glm/gtc/matrix_transform.hpp>
+	<iostream>
+	"include/Controls.h"
+
+1491262709 c:\users\richardba\workspace\mate71\surface\include\controls.h
+
+1491262709 source:c:\users\richardba\workspace\mate71\surface\main.cpp
+	<GL/glew.h>
+	<GL/glut.h>
+	<fstream>
+	<glm/glm.hpp>
+	<iostream>
+	<math.h>
+	<stdio.h>
+	<stdlib.h>
+	<vector>
+	"include/Utils.h"
+
+1491262709 c:\users\richardba\workspace\mate71\surface\include\utils.h
+	<vector>
+	<GL/glew.h>
+	<GLFW/glfw3.h>
+	<GL/glut.h>
+	<glm/glm.hpp>
+	"Controls.h"
+	"Shader.h"
+	"Texture.h"
+
+1491262709 c:\users\richardba\workspace\mate71\surface\include\shader.h
+
+1491262709 c:\users\richardba\workspace\mate71\surface\include\texture.h
+
+1491262709 source:c:\users\richardba\workspace\mate71\surface\shader.cpp
+	<stdio.h>
+	<string>
+	<vector>
+	<iostream>
+	<fstream>
+	<algorithm>
+	<stdlib.h>
+	<string.h>
+	<GL/glew.h>
+	"include/Shader.h"
+
+1491262709 source:c:\users\richardba\workspace\mate71\surface\texture.cpp
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<GL/glew.h>
+	<GLFW/glfw3.h>
+
+1491262709 source:c:\users\richardba\workspace\mate71\surface\utils.cpp
+	"include/Utils.h"
+	<iostream>
+	<vector>
+	<glm/gtc/matrix_transform.hpp>
+

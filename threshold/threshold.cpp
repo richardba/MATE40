@@ -12,33 +12,34 @@
 using namespace cv;
 using namespace std;
 
-int const max_value = 255;
+int const maxBinary = 255;
+int const maxBlur = 31;
+int const maxBlurEdge = 3;
+int const maxLowThres = 100;
+int const maxValue = 255;
 int const max_type = 4;
-int const max_lowThreshold = 100;
-int const max_BINARY_value = 255;
-int const max_blur = 31;
-int const max_blurEdge = 3;
 
-int threshold_value = 0;
-int threshold_type = 3;
-int blurEdge_value = 0;
-int blur_value = 0;
+int blurEdgeValue = 0;
+int blurValue = 0;
 int edgeThresh = 1;
+int intensity = 3;
+int kernelSize = 3;
 int lowThreshold;
-int ratio = 3;
-int kernel_size = 3;
+int thresType = 3;
+int thresValue = 0;
 
-Mat src, src_gray, dst, edge, detected_edges, tmp;
-const string window_name = "Artistic Threshold";
+Mat src, srcGray, output, edge, detectEdges, tmp;
+const string windowName = "Artistic Threshold";
 const string trackbar = "Trackbars";
-const string trackbar_type = "Tipo: \n 0: Binário \n 1: Binário Invertido \n 2: Truncado \n 3: Com zero \n 4: Com zero invertido";
-const string trackbar_value = "Value";
-const string trackbar_blur = "Blur";
-const string trackbar_edge = "Min Threshold";
-const string trackbar_blurEdge = "Blur on Edge";
+const string trackbarType = "Tipo: \n 0: Binário \n 1: Binário Invertido \n 2: Truncado \n 3: Com zero \n 4: Com zero invertido";
+const string trackbarValue = "Threshold";
+const string trackbarBlur = "Blur";
+const string trackbarEdge = "Borda";
+const string trackbarBlurEdge = "Blur on Edge";
+
+Mat openFile();
 
 void artisticThreshold( int, void* );
-Mat openFile();
 void cvMain(int, void*);
 
 int main( int, char** argv )
@@ -59,42 +60,42 @@ int main( int, char** argv )
 }
 void artisticThreshold( int, void* )
 {
-  threshold( src_gray, dst, threshold_value, max_BINARY_value, threshold_type );
+  threshold( srcGray, output, thresValue, maxBinary, thresType );
 
-  if(blur_value)
+  if(blurValue)
   {
-    if(blur_value%2==0)
+    if(blurValue%2==0)
     {
-      blur_value+=1;
+      blurValue+=1;
     }
-    medianBlur ( dst, dst, blur_value);
+    medianBlur ( output, output, blurValue);
   }
 
   if(lowThreshold)
   {
-    blur( src_gray, detected_edges, Size(3,3) );
-    Canny( detected_edges, detected_edges, lowThreshold+1, lowThreshold*ratio+1, kernel_size );
+    blur( srcGray, detectEdges, Size(3,3) );
+    Canny( detectEdges, detectEdges, lowThreshold+1, lowThreshold*intensity+1, kernelSize );
     edge = Scalar::all(0);
 
-    src.copyTo( edge, detected_edges);
+    src.copyTo( edge, detectEdges);
     cvtColor( edge, edge, COLOR_RGB2GRAY );
-    if(blurEdge_value)
+    if(blurEdgeValue)
     {
-      if(blurEdge_value%2==0)
+      if(blurEdgeValue%2==0)
       {
-        blurEdge_value+=1;
+        blurEdgeValue+=1;
       }
-      GaussianBlur( edge, edge, Size( blurEdge_value, blurEdge_value ), 0, 0 );
+      GaussianBlur( edge, edge, Size( blurEdgeValue, blurEdgeValue ), 0, 0 );
     }
 
-    /*if(threshold_type==0||threshold_type==3)
+    /*if(thresType==0||thresType==3)
     {
       bitwise_not ( edge, edge );
     }*/
-    dst = dst + edge;
+    output = output + edge;
   }
 
-  imshow( window_name, dst );
+  imshow( windowName, output );
 }
 
 Mat openFile()
@@ -149,15 +150,15 @@ void cvMain(int, void*)
   {
     exit(0);
   }
-  cvtColor( src, src_gray, COLOR_RGB2GRAY );
-  edge.create( src_gray.size(), src_gray.type() );
-  namedWindow( window_name, WINDOW_AUTOSIZE );
+  cvtColor( src, srcGray, COLOR_RGB2GRAY );
+  edge.create( srcGray.size(), srcGray.type() );
+  namedWindow( windowName, WINDOW_AUTOSIZE );
   namedWindow( trackbar, WINDOW_AUTOSIZE);
-  createTrackbar( trackbar_type, trackbar, &threshold_type, max_type, artisticThreshold );
-  createTrackbar( trackbar_value, trackbar, &threshold_value, max_value, artisticThreshold );
-  createTrackbar( trackbar_blur, trackbar, &blur_value, max_blur, artisticThreshold );
-  createTrackbar( trackbar_edge, trackbar, &lowThreshold, max_lowThreshold, artisticThreshold );
-  createTrackbar( trackbar_blurEdge, trackbar, &blurEdge_value, max_blurEdge, artisticThreshold );
+  createTrackbar( trackbarType, trackbar, &thresType, max_type, artisticThreshold );
+  createTrackbar( trackbarValue, trackbar, &thresValue, maxValue, artisticThreshold );
+  createTrackbar( trackbarBlur, trackbar, &blurValue, maxBlur, artisticThreshold );
+  createTrackbar( trackbarEdge, trackbar, &lowThreshold, maxLowThres, artisticThreshold );
+  createTrackbar( trackbarBlurEdge, trackbar, &blurEdgeValue, maxBlurEdge, artisticThreshold );
 
   artisticThreshold( 0, 0 );
 }
